@@ -1674,10 +1674,16 @@
             updateHUD();
 
             for (let i = 0; i < spawnCount; i++) {
-                setTimeout(() => {
-                    if (!gameStarted || gamePaused) return;
+                const scheduleSpawn = () => {
+                    if (!gameStarted || !waveInProgress) return;
+                    if (gamePaused) {
+                        setTimeout(scheduleSpawn, 200);
+                        return;
+                    }
                     createEnemy();
-                }, i * spawnSpacing);
+                };
+
+                setTimeout(scheduleSpawn, i * spawnSpacing);
             }
         }
 
