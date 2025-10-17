@@ -443,6 +443,16 @@
         let isReloading = false;
         let clock = new THREE.Clock();
         let obstacles = [];
+        const navigationGrid = {
+            cellSize: 2,
+            halfSize: 50,
+            width: Math.floor(100 / 2),
+            height: Math.floor(100 / 2),
+            cells: []
+        };
+        const navigationTempStart = new THREE.Vector3();
+        const navigationTempEnd = new THREE.Vector3();
+        const navigationLine = new THREE.Line3(new THREE.Vector3(), new THREE.Vector3());
         let isMouseDown = false;
         let lastShotTime = 0;
         const baseFireRate = 300;
@@ -733,6 +743,259 @@
                 walkway.userData.isWall = true;
                 obstacles.push(walkway);
             }
+
+            buildNavigationGrid();
+        }
+
+        function buildNavigationGrid() {
+            const { width, height } = navigationGrid;
+            navigationGrid.cells = new Array(width);
+            for (let x = 0; x < width; x++) {
+                navigationGrid.cells[x] = new Array(height);
+                for (let z = 0; z < height; z++) {
+                    navigationGrid.cells[x][z] = 0;
+                }
+            }
+
+            const padding = 0.9;
+            for (const obstacle of obstacles) {
+                if (!obstacle.userData || !obstacle.userData.boundingBox) continue;
+
+                const expanded = obstacle.userData.boundingBox.clone();
+                expanded.min.x -= padding;
+                expanded.min.z -= padding;
+                expanded.max.x += padding;
+                expanded.max.z += padding;
+
+                const minX = Math.max(0, Math.floor((expanded.min.x + navigationGrid.halfSize) / navigationGrid.cellSize));
+                const minZ = Math.max(0, Math.floor((expanded.min.z + navigationGrid.halfSize) / navigationGrid.cellSize));
+                const maxX = Math.min(navigationGrid.width - 1, Math.ceil((expanded.max.x + navigationGrid.halfSize) / navigationGrid.cellSize) - 1);
+                const maxZ = Math.min(navigationGrid.height - 1, Math.ceil((expanded.max.z + navigationGrid.halfSize) / navigationGrid.cellSize) - 1);
+
+                for (let gx = minX; gx <= maxX; gx++) {
+                    const cellMinX = gx * navigationGrid.cellSize - navigationGrid.halfSize;
+                    const cellMaxX = cellMinX + navigationGrid.cellSize;
+                    for (let gz = minZ; gz <= maxZ; gz++) {
+                        const cellMinZ = gz * navigationGrid.cellSize - navigationGrid.halfSize;
+                        const cellMaxZ = cellMinZ + navigationGrid.cellSize;
+
+                        if (expanded.max.x > cellMinX && expanded.min.x < cellMaxX &&
+                            expanded.max.z > cellMinZ && expanded.min.z < cellMaxZ) {
+                            navigationGrid.cells[gx][gz] = 1;
+                        }
+                    }
+                }
+            }
+        }
+
+        function worldToGrid(position) {
+            const x = Math.floor((position.x + navigationGrid.halfSize) / navigationGrid.cellSize);
+            const z = Math.floor((position.z + navigationGrid.halfSize) / navigationGrid.cellSize);
+            if (Number.isNaN(x) || Number.isNaN(z)) return null;
+            return {
+                x: Math.max(0, Math.min(navigationGrid.width - 1, x)),
+                z: Math.max(0, Math.min(navigationGrid.height - 1, z))
+            };
+        }
+
+        function gridToWorld(x, z) {
+            return new THREE.Vector3(
+                (x + 0.5) * navigationGrid.cellSize - navigationGrid.halfSize,
+                1.1,
+                (z + 0.5) * navigationGrid.cellSize - navigationGrid.halfSize
+            );
+        }
+
+        function isCellWalkable(x, z) {
+            if (x < 0 || z < 0 || x >= navigationGrid.width || z >= navigationGrid.height) return false;
+            return navigationGrid.cells[x][z] === 0;
+        }
+
+        function findNearestWalkableCell(x, z) {
+            if (isCellWalkable(x, z)) {
+                return { x, z };
+            }
+
+            const visited = new Set();
+            const queue = [{ x, z }];
+            visited.add(`${x},${z}`);
+            const directions = [
+                [1, 0], [-1, 0], [0, 1], [0, -1],
+                [1, 1], [1, -1], [-1, 1], [-1, -1]
+            ];
+
+            while (queue.length > 0) {
+                const current = queue.shift();
+                for (const [dx, dz] of directions) {
+                    const nx = current.x + dx;
+                    const nz = current.z + dz;
+                    const key = `${nx},${nz}`;
+                    if (nx < 0 || nz < 0 || nx >= navigationGrid.width || nz >= navigationGrid.height) continue;
+                    if (visited.has(key)) continue;
+                    if (isCellWalkable(nx, nz)) {
+                        return { x: nx, z: nz };
+                    }
+                    visited.add(key);
+                    queue.push({ x: nx, z: nz });
+                }
+            }
+
+            return null;
+        }
+
+        function heuristic(a, b) {
+            return Math.hypot(a.x - b.x, a.z - b.z);
+        }
+
+        function findPath(startPosition, targetPosition) {
+            if (!navigationGrid.cells || navigationGrid.cells.length === 0) return null;
+
+            const startCell = worldToGrid(startPosition);
+            const goalCell = worldToGrid(targetPosition);
+            if (!startCell || !goalCell) return null;
+
+            const validStart = findNearestWalkableCell(startCell.x, startCell.z);
+            const validGoal = findNearestWalkableCell(goalCell.x, goalCell.z);
+            if (!validStart || !validGoal) return null;
+
+            const startKey = `${validStart.x},${validStart.z}`;
+            const goalKey = `${validGoal.x},${validGoal.z}`;
+            const open = [startKey];
+            const openSet = new Set([startKey]);
+            const cameFrom = new Map();
+            const gScore = new Map([[startKey, 0]]);
+            const fScore = new Map([[startKey, heuristic(validStart, validGoal)]]);
+
+            const neighborOffsets = [
+                [1, 0], [-1, 0], [0, 1], [0, -1],
+                [1, 1], [1, -1], [-1, 1], [-1, -1]
+            ];
+
+            while (open.length > 0) {
+                let currentIndex = 0;
+                let currentKey = open[0];
+                let lowestScore = fScore.get(currentKey) ?? Infinity;
+                for (let i = 1; i < open.length; i++) {
+                    const key = open[i];
+                    const score = fScore.get(key) ?? Infinity;
+                    if (score < lowestScore) {
+                        lowestScore = score;
+                        currentKey = key;
+                        currentIndex = i;
+                    }
+                }
+
+                open.splice(currentIndex, 1);
+                openSet.delete(currentKey);
+
+                if (currentKey === goalKey) {
+                    return reconstructPath(cameFrom, currentKey);
+                }
+
+                const [cx, cz] = currentKey.split(',').map(Number);
+                for (const [dx, dz] of neighborOffsets) {
+                    const nx = cx + dx;
+                    const nz = cz + dz;
+                    const neighborKey = `${nx},${nz}`;
+
+                    if (!isCellWalkable(nx, nz)) continue;
+
+                    if (Math.abs(dx) === 1 && Math.abs(dz) === 1) {
+                        if (!isCellWalkable(cx + dx, cz) || !isCellWalkable(cx, cz + dz)) {
+                            continue;
+                        }
+                    }
+
+                    const tentativeG = (gScore.get(currentKey) ?? Infinity) + (Math.abs(dx) === 1 && Math.abs(dz) === 1 ? Math.SQRT2 : 1);
+                    const existingG = gScore.get(neighborKey);
+                    if (tentativeG < (existingG ?? Infinity)) {
+                        cameFrom.set(neighborKey, currentKey);
+                        gScore.set(neighborKey, tentativeG);
+                        const neighborCell = { x: nx, z: nz };
+                        fScore.set(neighborKey, tentativeG + heuristic(neighborCell, validGoal));
+                        if (!openSet.has(neighborKey)) {
+                            openSet.add(neighborKey);
+                            open.push(neighborKey);
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        function reconstructPath(cameFrom, currentKey) {
+            const totalPath = [currentKey];
+            while (cameFrom.has(currentKey)) {
+                currentKey = cameFrom.get(currentKey);
+                totalPath.push(currentKey);
+            }
+            totalPath.reverse();
+
+            const waypoints = [];
+            for (let i = 1; i < totalPath.length; i++) {
+                const [x, z] = totalPath[i].split(',').map(Number);
+                waypoints.push(gridToWorld(x, z));
+            }
+            return waypoints;
+        }
+
+        function hasLineOfSight(start, end) {
+            if (!obstacles.length) return true;
+
+            navigationTempStart.set(start.x, 1, start.z);
+            navigationTempEnd.set(end.x, 1, end.z);
+            navigationLine.set(navigationTempStart, navigationTempEnd);
+
+            for (const obstacle of obstacles) {
+                if (!obstacle.userData || !obstacle.userData.boundingBox) continue;
+                if (obstacle.userData.boundingBox.intersectsLine(navigationLine)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        function getPathDirectionForEnemy(enemy, delta) {
+            if (!navigationGrid.cells || navigationGrid.cells.length === 0) return null;
+
+            enemy.userData.pathRecalcTimer = (enemy.userData.pathRecalcTimer || 0) - delta;
+
+            const targetCell = worldToGrid(yawObject.position);
+            const targetKey = targetCell ? `${targetCell.x},${targetCell.z}` : null;
+
+            if (!enemy.userData.path || enemy.userData.path.length === 0 || enemy.userData.pathTargetKey !== targetKey || enemy.userData.pathRecalcTimer <= 0) {
+                const newPath = findPath(enemy.position, yawObject.position);
+                if (newPath && newPath.length > 0) {
+                    enemy.userData.path = newPath;
+                    enemy.userData.pathTargetKey = targetKey;
+                    enemy.userData.pathRecalcTimer = 0.35 + Math.random() * 0.25;
+                } else {
+                    enemy.userData.path = [];
+                    enemy.userData.pathTargetKey = null;
+                    enemy.userData.pathRecalcTimer = 0.2;
+                }
+            }
+
+            if (!enemy.userData.path || enemy.userData.path.length === 0) {
+                return null;
+            }
+
+            while (enemy.userData.path.length > 0) {
+                const waypoint = enemy.userData.path[0];
+                const toWaypoint = new THREE.Vector3().subVectors(waypoint, enemy.position);
+                toWaypoint.y = 0;
+                const distance = toWaypoint.length();
+                if (distance < 0.4) {
+                    enemy.userData.path.shift();
+                    continue;
+                }
+                toWaypoint.normalize();
+                return toWaypoint;
+            }
+
+            return null;
         }
 
         function createPlayerModel() {
@@ -880,6 +1143,9 @@
             enemy.userData.hitGlow = new THREE.PointLight(0xff3355, 0.8, 6);
             enemy.userData.hitGlow.position.y = 1.2;
             enemy.add(enemy.userData.hitGlow);
+            enemy.userData.path = [];
+            enemy.userData.pathTargetKey = null;
+            enemy.userData.pathRecalcTimer = 0;
 
             const visorGeometry = new THREE.TorusGeometry(0.5, 0.08, 12, 24);
             const visorMaterial = new THREE.MeshBasicMaterial({
@@ -1214,23 +1480,46 @@
             for (let i = enemies.length - 1; i >= 0; i--) {
                 const enemy = enemies[i];
                 const toPlayer = new THREE.Vector3().subVectors(yawObject.position, enemy.position);
-                const horizontal = new THREE.Vector3(toPlayer.x, 0, toPlayer.z);
-                const distance = horizontal.length();
+                const planarToPlayer = new THREE.Vector3(toPlayer.x, 0, toPlayer.z);
+                let moveDirection = null;
 
-                if (distance > 0.001) {
-                    horizontal.normalize();
+                if (planarToPlayer.lengthSq() > 0.000001) {
+                    if (hasLineOfSight(enemy.position, yawObject.position)) {
+                        enemy.userData.path = [];
+                        enemy.userData.pathTargetKey = null;
+                        enemy.userData.pathRecalcTimer = 0.2;
+                        moveDirection = planarToPlayer.clone().normalize();
+                    } else {
+                        const pathDirection = getPathDirectionForEnemy(enemy, delta);
+                        if (pathDirection) {
+                            moveDirection = pathDirection;
+                        } else {
+                            moveDirection = planarToPlayer.clone().normalize();
+                        }
+                    }
+                }
+
+                if (moveDirection) {
                     const prevPos = enemy.position.clone();
-                    enemy.position.addScaledVector(horizontal, enemy.userData.speed * delta);
+                    enemy.position.addScaledVector(moveDirection, enemy.userData.speed * delta);
 
                     const enemyBox = new THREE.Box3().setFromCenterAndSize(
                         new THREE.Vector3(enemy.position.x, enemy.position.y, enemy.position.z),
                         new THREE.Vector3(1.2, 3, 1.2)
                     );
+                    let collided = false;
                     for (const obs of obstacles) {
                         if (obs.userData.boundingBox && obs.userData.boundingBox.intersectsBox(enemyBox)) {
-                            enemy.position.copy(prevPos);
+                            collided = true;
                             break;
                         }
+                    }
+                    if (collided) {
+                        enemy.position.copy(prevPos);
+                        if (enemy.userData.path && enemy.userData.path.length > 0) {
+                            enemy.userData.path.shift();
+                        }
+                        enemy.userData.pathRecalcTimer = 0;
                     }
                 }
 
@@ -1250,19 +1539,27 @@
                     enemy.userData.hitGlow.intensity = 0.6 + (1 - healthPercent) * 0.8;
                 }
 
+                const updatedPlanar = new THREE.Vector3().subVectors(yawObject.position, enemy.position);
+                updatedPlanar.y = 0;
+                const distanceToPlayer = updatedPlanar.length();
+                let approachDirection = null;
+                if (distanceToPlayer > 0.000001) {
+                    approachDirection = updatedPlanar.clone().normalize();
+                }
+
                 if (enemy.userData.isArmed &&
                     currentTime - enemy.userData.lastShotTime > enemy.userData.shootCooldown) {
-                    const distanceToPlayer = enemy.position.distanceTo(yawObject.position);
-                    if (distanceToPlayer < 35) {
+                    const rangedDistance = enemy.position.distanceTo(yawObject.position);
+                    if (rangedDistance < 35) {
                         enemyShoot(enemy);
                     }
                 }
 
-                if (distance < 1.2) {
-                    enemy.position.addScaledVector(horizontal, -0.5);
+                if (distanceToPlayer < 1.2 && approachDirection) {
+                    enemy.position.addScaledVector(approachDirection, -0.5);
                 }
 
-                if (distance < 2.4) {
+                if (distanceToPlayer < 2.4) {
                     const damageRate = enemy.userData.isArmed ? 32 : 24;
                     health -= damageRate * delta;
                     lastDamageTime = currentTime;
