@@ -455,8 +455,12 @@
             distances: new Float32Array(NAVIGATION_GRID_AREA),
             queueX: new Int16Array(NAVIGATION_GRID_AREA),
             queueZ: new Int16Array(NAVIGATION_GRID_AREA),
+            visited: new Uint32Array(NAVIGATION_GRID_AREA),
+            visitedStamp: 1,
             lastTargetX: -1,
             lastTargetZ: -1,
+            lastTargetIndex: -1,
+            lastPlayerCellIndex: -1,
             lastUpdate: 0
         };
         const NAVIGATION_INFINITY = 1e9;
@@ -465,6 +469,8 @@
             [1, 0, 1], [-1, 0, 1], [0, 1, 1], [0, -1, 1],
             [1, 1, Math.SQRT2], [1, -1, Math.SQRT2], [-1, 1, Math.SQRT2], [-1, -1, Math.SQRT2]
         ];
+        const NAVIGATION_FIELD_UPDATE_INTERVAL = 280;
+        const NAVIGATION_PLAYER_CELL_COOLDOWN = 140;
         const navigationDirectionTarget = new THREE.Vector3();
         const navigationTempStart = new THREE.Vector3();
         const navigationTempEnd = new THREE.Vector3();
@@ -547,6 +553,7 @@
 
             // Renderer setup
             renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -573,8 +580,8 @@
             directionalLight.shadow.camera.right = 50;
             directionalLight.shadow.camera.top = 50;
             directionalLight.shadow.camera.bottom = -50;
-            directionalLight.shadow.mapSize.width = 2048;
-            directionalLight.shadow.mapSize.height = 2048;
+            directionalLight.shadow.mapSize.width = 1024;
+            directionalLight.shadow.mapSize.height = 1024;
             scene.add(directionalLight);
             
             // Point lights for atmosphere
@@ -763,7 +770,7 @@
             for (let i = 0; i < 4; i++) {
                 const walkway = new THREE.Mesh(new THREE.BoxGeometry(4, 0.4, 18), walkwayMaterial);
                 walkway.position.set((Math.random() - 0.5) * 70, 0.2, (Math.random() - 0.5) * 70);
-                walkway.castShadow = true;
+                walkway.castShadow = false;
                 walkway.receiveShadow = true;
                 scene.add(walkway);
                 walkway.updateMatrixWorld();
@@ -817,8 +824,12 @@
 
             navigationField.lastTargetX = -1;
             navigationField.lastTargetZ = -1;
+            navigationField.lastTargetIndex = -1;
+            navigationField.lastPlayerCellIndex = -1;
             navigationField.lastUpdate = 0;
             navigationField.distances.fill(NAVIGATION_INFINITY);
+            navigationField.visited.fill(0);
+            navigationField.visitedStamp = 1;
         }
 
         function worldToGrid(position) {
@@ -845,32 +856,55 @@
         }
 
         function findNearestWalkableCell(x, z) {
+            const { width, height } = navigationGrid;
+
             if (isCellWalkable(x, z)) {
                 return { x, z };
             }
 
-            const visited = new Set();
-            const queue = [{ x, z }];
-            visited.add(`${x},${z}`);
-            let head = 0;
-            const directions = [
-                [1, 0], [-1, 0], [0, 1], [0, -1],
-                [1, 1], [1, -1], [-1, 1], [-1, -1]
-            ];
+            const queueX = navigationField.queueX;
+            const queueZ = navigationField.queueZ;
+            const visited = navigationField.visited;
 
-            while (head < queue.length) {
-                const current = queue[head++];
-                for (const [dx, dz] of directions) {
-                    const nx = current.x + dx;
-                    const nz = current.z + dz;
-                    const key = `${nx},${nz}`;
-                    if (nx < 0 || nz < 0 || nx >= navigationGrid.width || nz >= navigationGrid.height) continue;
-                    if (visited.has(key)) continue;
+            let stamp = navigationField.visitedStamp++;
+            if (navigationField.visitedStamp > 0xffffff00) {
+                visited.fill(0);
+                navigationField.visitedStamp = 1;
+                stamp = 1;
+            }
+
+            let head = 0;
+            let tail = 0;
+
+            const startIndex = x + z * width;
+            queueX[tail] = x;
+            queueZ[tail] = z;
+            visited[startIndex] = stamp;
+            tail++;
+
+            while (head < tail) {
+                const cx = queueX[head];
+                const cz = queueZ[head];
+                head++;
+
+                for (const [dx, dz] of navigationNeighborOffsets) {
+                    const nx = cx + dx;
+                    const nz = cz + dz;
+                    if (nx < 0 || nz < 0 || nx >= width || nz >= height) continue;
+
+                    const index = nx + nz * width;
+                    if (visited[index] === stamp) continue;
+                    visited[index] = stamp;
+
                     if (isCellWalkable(nx, nz)) {
                         return { x: nx, z: nz };
                     }
-                    visited.add(key);
-                    queue.push({ x: nx, z: nz });
+
+                    if (tail < NAVIGATION_GRID_AREA) {
+                        queueX[tail] = nx;
+                        queueZ[tail] = nz;
+                        tail++;
+                    }
                 }
             }
 
@@ -896,29 +930,49 @@
 
         function updateNavigationField(force = false) {
             if (!navigationGrid.cells || navigationGrid.cells.length === 0) return;
+            if (!force && enemies.length === 0) return;
 
             const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
-            const updateInterval = 180;
-            if (!force && navigationField.lastUpdate !== 0 && now - navigationField.lastUpdate < updateInterval) {
+
+            const playerCell = worldToGrid(yawObject.position);
+            if (!playerCell) return;
+
+            const playerIndex = playerCell.x + playerCell.z * navigationGrid.width;
+            if (!force &&
+                navigationField.lastPlayerCellIndex === playerIndex &&
+                navigationField.lastUpdate !== 0 &&
+                now - navigationField.lastUpdate < NAVIGATION_PLAYER_CELL_COOLDOWN) {
                 return;
             }
 
-            const targetCell = worldToGrid(yawObject.position);
+            let targetCell = null;
+            if (isCellWalkable(playerCell.x, playerCell.z)) {
+                targetCell = playerCell;
+            } else {
+                targetCell = findNearestWalkableCell(playerCell.x, playerCell.z);
+            }
+
             if (!targetCell) return;
 
-            const validTarget = findNearestWalkableCell(targetCell.x, targetCell.z);
-            if (!validTarget) return;
+            const targetIndex = targetCell.x + targetCell.z * navigationGrid.width;
+            if (!force) {
+                const timeSinceUpdate = now - navigationField.lastUpdate;
+                if (navigationField.lastTargetIndex === targetIndex &&
+                    navigationField.lastPlayerCellIndex === playerIndex &&
+                    timeSinceUpdate < NAVIGATION_FIELD_UPDATE_INTERVAL) {
+                    return;
+                }
 
-            if (!force &&
-                validTarget.x === navigationField.lastTargetX &&
-                validTarget.z === navigationField.lastTargetZ &&
-                now - navigationField.lastUpdate < 500) {
-                return;
+                if (navigationField.lastTargetIndex === targetIndex && timeSinceUpdate < 500) {
+                    return;
+                }
             }
 
-            buildNavigationField(validTarget);
-            navigationField.lastTargetX = validTarget.x;
-            navigationField.lastTargetZ = validTarget.z;
+            buildNavigationField(targetCell);
+            navigationField.lastTargetX = targetCell.x;
+            navigationField.lastTargetZ = targetCell.z;
+            navigationField.lastTargetIndex = targetIndex;
+            navigationField.lastPlayerCellIndex = playerIndex;
             navigationField.lastUpdate = now;
         }
 
@@ -1914,7 +1968,7 @@
                 roughness: 0.2
             });
             const medkit = new THREE.Mesh(medkitGeometry, medkitMaterial);
-            medkit.castShadow = true;
+            medkit.castShadow = false;
             medkit.receiveShadow = true;
 
             const spawnVector = originPosition ? originPosition.clone() : getSpawnPosition(6);
@@ -2215,6 +2269,15 @@
             lastMedkitSpawn = Date.now();
             updateHUD();
             updateModeIndicator();
+
+            navigationField.lastTargetX = -1;
+            navigationField.lastTargetZ = -1;
+            navigationField.lastTargetIndex = -1;
+            navigationField.lastPlayerCellIndex = -1;
+            navigationField.lastUpdate = 0;
+            navigationField.distances.fill(NAVIGATION_INFINITY);
+            navigationField.visited.fill(0);
+            navigationField.visitedStamp = 1;
 
             // Request pointer lock
             renderer.domElement.requestPointerLock =
