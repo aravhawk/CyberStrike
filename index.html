@@ -945,12 +945,23 @@
 
             navigationTempStart.set(start.x, 1, start.z);
             navigationTempEnd.set(end.x, 1, end.z);
-            navigationLine.set(navigationTempStart, navigationTempEnd);
+
+            const direction = new THREE.Vector3().subVectors(navigationTempEnd, navigationTempStart);
+            const distance = direction.length();
+            direction.normalize();
+
+            const ray = new THREE.Ray(navigationTempStart, direction);
+            const intersectionPoint = new THREE.Vector3();
 
             for (const obstacle of obstacles) {
                 if (!obstacle.userData || !obstacle.userData.boundingBox) continue;
-                if (obstacle.userData.boundingBox.intersectsLine(navigationLine)) {
-                    return false;
+
+                const intersection = ray.intersectBox(obstacle.userData.boundingBox, intersectionPoint);
+                if (intersection) {
+                    const intersectionDistance = navigationTempStart.distanceTo(intersection);
+                    if (intersectionDistance <= distance) {
+                        return false;
+                    }
                 }
             }
 
