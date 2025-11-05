@@ -949,7 +949,7 @@
 
             for (const obstacle of obstacles) {
                 if (!obstacle.userData || !obstacle.userData.boundingBox) continue;
-                if (obstacle.userData.boundingBox.intersectsLine(navigationLine)) {
+                if (navigationLine.intersectsBox(obstacle.userData.boundingBox)) {
                     return false;
                 }
             }
