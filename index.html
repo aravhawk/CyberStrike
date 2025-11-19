@@ -1227,7 +1227,7 @@
             const speedMultiplier = 1 + (wave - 1) * 0.18 + Math.min(0.25, kills * 0.02);
             enemy.userData.speed = (Math.random() * 1.5 + 1.4) * speedMultiplier;
 
-            enemy.userData.isArmed = kills >= 15 || wave >= 3;
+            enemy.userData.isArmed = kills >= 15;
             enemy.userData.lastShotTime = Date.now();
             enemy.userData.shootCooldown = Math.max(1200, 2600 - wave * 160);
             enemy.userData.hitGlow = new THREE.PointLight(0xff3355, 0.8, 6);
