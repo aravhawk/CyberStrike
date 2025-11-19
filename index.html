@@ -247,12 +247,11 @@
             left: 50%;
             transform: translate(-50%, -50%);
             width: min(90vw, 520px);
-            max-height: 90vh;
-            overflow-y: auto;
+            max-height: 95vh;
             background: radial-gradient(circle at top, rgba(10, 32, 64, 0.95) 0%, rgba(4, 10, 24, 0.95) 70%);
             border: 1px solid rgba(0, 255, 213, 0.4);
-            border-radius: 24px;
-            padding: 36px 42px;
+            border-radius: clamp(12px, 2vh, 24px);
+            padding: clamp(16px, 3vh, 36px) clamp(20px, 4vw, 42px);
             text-align: center;
             z-index: 2000;
             box-shadow: 0 25px 80px rgba(0, 0, 0, 0.65), inset 0 0 40px rgba(0, 255, 170, 0.12);
@@ -262,59 +261,47 @@
         #instructions::before {
             content: '';
             position: absolute;
-            inset: 12px;
-            border-radius: 18px;
+            inset: clamp(6px, 1vh, 12px);
+            border-radius: clamp(10px, 1.5vh, 18px);
             border: 1px dashed rgba(0, 255, 255, 0.2);
             pointer-events: none;
         }
 
-        #instructions::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        #instructions::-webkit-scrollbar-track {
-            background: rgba(5, 16, 32, 0.5);
-            border-radius: 10px;
-        }
-
-        #instructions::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, rgba(0, 255, 213, 0.6), rgba(0, 116, 255, 0.6));
-            border-radius: 10px;
-            border: 1px solid rgba(0, 255, 213, 0.3);
-        }
-
-        #instructions::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, rgba(0, 255, 213, 0.8), rgba(0, 116, 255, 0.8));
-        }
-
         #instructions h1 {
             color: #00ffd5;
-            margin-bottom: 6px;
+            margin-bottom: clamp(3px, 0.5vh, 6px);
             text-transform: uppercase;
-            letter-spacing: 6px;
-            font-size: 32px;
+            letter-spacing: clamp(2px, 0.6vw, 6px);
+            font-size: clamp(20px, 3vh, 32px);
             text-shadow: 0 0 14px rgba(0, 255, 213, 0.7);
         }
 
         #instructions h3 {
-            margin: 0 0 22px;
+            margin: 0 0 clamp(12px, 2vh, 22px);
             color: rgba(255, 255, 255, 0.8);
             font-weight: 500;
-            letter-spacing: 3px;
+            letter-spacing: clamp(1px, 0.3vw, 3px);
             text-transform: uppercase;
+            font-size: clamp(12px, 1.4vh, 16px);
+        }
+
+        #instructions p {
+            font-size: clamp(11px, 1.3vh, 14px);
+            line-height: 1.4;
+            margin-top: clamp(12px, 1.8vh, 20px);
         }
 
         #instructions button {
             background: linear-gradient(120deg, #00ffd5, #0074ff);
             color: #00111f;
             border: none;
-            padding: 14px 48px;
-            font-size: 18px;
+            padding: clamp(10px, 1.5vh, 14px) clamp(32px, 5vw, 48px);
+            font-size: clamp(14px, 1.8vh, 18px);
             border-radius: 999px;
             cursor: pointer;
-            margin-top: 28px;
+            margin-top: clamp(16px, 2.5vh, 28px);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
-            letter-spacing: 2px;
+            letter-spacing: clamp(1px, 0.2vw, 2px);
             text-transform: uppercase;
             box-shadow: 0 15px 35px rgba(0, 128, 255, 0.35);
         }
@@ -325,17 +312,17 @@
         }
 
         .control-item {
-            margin: 12px 0;
+            margin: clamp(6px, 1vh, 12px) 0;
             text-align: left;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 10px 16px;
-            border-radius: 12px;
+            padding: clamp(6px, 1vh, 10px) clamp(10px, 1.5vw, 16px);
+            border-radius: clamp(6px, 1vh, 12px);
             background: rgba(5, 16, 32, 0.85);
             border: 1px solid rgba(0, 255, 255, 0.15);
-            font-size: 14px;
-            letter-spacing: 1px;
+            font-size: clamp(11px, 1.4vh, 14px);
+            letter-spacing: clamp(0.5px, 0.1vw, 1px);
         }
 
         .control-item span:last-child,
@@ -350,13 +337,13 @@
             align-items: center;
             justify-content: center;
             background: rgba(0, 255, 213, 0.15);
-            padding: 6px 14px;
-            border-radius: 8px;
-            margin-right: 12px;
-            min-width: 88px;
+            padding: clamp(4px, 0.6vh, 6px) clamp(10px, 1.5vw, 14px);
+            border-radius: clamp(4px, 0.8vh, 8px);
+            margin-right: clamp(8px, 1vw, 12px);
+            min-width: clamp(60px, 8vw, 88px);
             text-align: center;
             font-weight: 600;
-            letter-spacing: 1px;
+            letter-spacing: clamp(0.5px, 0.1vw, 1px);
             color: #00ffd5;
             border: 1px solid rgba(0, 255, 213, 0.35);
             text-transform: uppercase;
