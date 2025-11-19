@@ -756,66 +756,6 @@
                 scene.add(glowLight);
             }
 
-            // Floating holo-rings
-            const ringGeometry = new THREE.TorusGeometry(4, 0.08, 16, 100);
-            const ringMaterial = new THREE.MeshStandardMaterial({
-                color: 0x00fff6,
-                emissive: 0x00fff6,
-                emissiveIntensity: 0.6,
-                roughness: 0.1,
-                metalness: 1
-            });
-            for (let i = 0; i < 3; i++) {
-                const ring = new THREE.Mesh(ringGeometry, ringMaterial);
-                ring.position.set((Math.random() - 0.5) * 60, 4 + i * 1.5, (Math.random() - 0.5) * 60);
-                scene.add(ring);
-                environmentAnimators.push((delta, elapsed) => {
-                    ring.rotation.x = elapsed * 0.25 + i;
-                    ring.rotation.z = elapsed * 0.3;
-                });
-            }
-
-            // Hovering energy crystals
-            const crystalGeometry = new THREE.OctahedronGeometry(1.2, 1);
-            const crystalMaterial = new THREE.MeshStandardMaterial({
-                color: 0x00ffcc,
-                emissive: 0x00ffcc,
-                emissiveIntensity: 0.7,
-                metalness: 0.4,
-                roughness: 0.2,
-                transparent: true,
-                opacity: 0.8
-            });
-            for (let i = 0; i < 6; i++) {
-                const crystal = new THREE.Mesh(crystalGeometry, crystalMaterial);
-                crystal.position.set((Math.random() - 0.5) * 70, 2 + Math.random() * 2, (Math.random() - 0.5) * 70);
-                scene.add(crystal);
-                environmentAnimators.push((delta, elapsed) => {
-                    crystal.rotation.y += delta * 0.6;
-                    crystal.position.y = 2 + Math.sin(elapsed * 1.5 + i) * 0.6;
-                });
-            }
-
-            // Neon walkways
-            const walkwayMaterial = new THREE.MeshStandardMaterial({
-                color: 0x0a101f,
-                emissive: 0x0050ff,
-                emissiveIntensity: 0.4,
-                metalness: 0.8,
-                roughness: 0.25
-            });
-            for (let i = 0; i < 4; i++) {
-                const walkway = new THREE.Mesh(new THREE.BoxGeometry(4, 0.4, 18), walkwayMaterial);
-                walkway.position.set((Math.random() - 0.5) * 70, 0.2, (Math.random() - 0.5) * 70);
-                walkway.castShadow = true;
-                walkway.receiveShadow = true;
-                scene.add(walkway);
-                walkway.updateMatrixWorld();
-                walkway.userData.boundingBox = new THREE.Box3().setFromObject(walkway);
-                walkway.userData.isWall = true;
-                obstacles.push(walkway);
-            }
-
             buildNavigationGrid();
         }
 
