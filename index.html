@@ -980,6 +980,73 @@
             return true;
         }
 
+        function checkCollisionAtPosition(position) {
+            const testBox = new THREE.Box3().setFromCenterAndSize(
+                new THREE.Vector3(position.x, position.y, position.z),
+                new THREE.Vector3(1.2, 3, 1.2)
+            );
+            for (const obs of obstacles) {
+                if (obs.userData.boundingBox && obs.userData.boundingBox.intersectsBox(testBox)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function findAlternativeDirection(currentPosition, intendedDirection, speed) {
+            const testAngles = [0, 45, -45, 90, -90, 135, -135];
+            const stepDistance = speed * 0.8;
+
+            for (const angle of testAngles) {
+                const radians = (angle * Math.PI) / 180;
+                const cos = Math.cos(radians);
+                const sin = Math.sin(radians);
+
+                const testDirection = new THREE.Vector3(
+                    intendedDirection.x * cos - intendedDirection.z * sin,
+                    0,
+                    intendedDirection.x * sin + intendedDirection.z * cos
+                );
+                testDirection.normalize();
+
+                const testPosition = currentPosition.clone().addScaledVector(testDirection, stepDistance);
+
+                if (!checkCollisionAtPosition(testPosition)) {
+                    return testDirection;
+                }
+            }
+
+            return null;
+        }
+
+        function getSlideDirection(currentPosition, intendedDirection, speed) {
+            const stepDistance = speed;
+            const futurePos = currentPosition.clone().addScaledVector(intendedDirection, stepDistance);
+
+            if (!checkCollisionAtPosition(futurePos)) {
+                return intendedDirection;
+            }
+
+            const perpendicular1 = new THREE.Vector3(-intendedDirection.z, 0, intendedDirection.x).normalize();
+            const perpendicular2 = new THREE.Vector3(intendedDirection.z, 0, -intendedDirection.x).normalize();
+
+            const slideDirections = [
+                intendedDirection.clone().addScaledVector(perpendicular1, 0.7).normalize(),
+                intendedDirection.clone().addScaledVector(perpendicular2, 0.7).normalize(),
+                perpendicular1,
+                perpendicular2
+            ];
+
+            for (const slideDir of slideDirections) {
+                const slidePos = currentPosition.clone().addScaledVector(slideDir, stepDistance * 0.6);
+                if (!checkCollisionAtPosition(slidePos)) {
+                    return slideDir;
+                }
+            }
+
+            return findAlternativeDirection(currentPosition, intendedDirection, speed);
+        }
+
         function getPathDirectionForEnemy(enemy, delta) {
             if (!navigationGrid.cells || navigationGrid.cells.length === 0) return null;
 
@@ -1169,6 +1236,9 @@
             enemy.userData.path = [];
             enemy.userData.pathTargetKey = null;
             enemy.userData.pathRecalcTimer = 0;
+            enemy.userData.stuckCounter = 0;
+            enemy.userData.lastPosition = spawnPosition.clone();
+            enemy.userData.collisionCounter = 0;
 
             const visorGeometry = new THREE.TorusGeometry(0.5, 0.08, 12, 24);
             const visorMaterial = new THREE.MeshBasicMaterial({
@@ -1524,7 +1594,12 @@
 
                 if (moveDirection) {
                     const prevPos = enemy.position.clone();
-                    enemy.position.addScaledVector(moveDirection, enemy.userData.speed * delta);
+                    const speedDelta = enemy.userData.speed * delta;
+
+                    const slideDir = getSlideDirection(enemy.position, moveDirection, speedDelta);
+                    const actualDirection = slideDir || moveDirection;
+
+                    enemy.position.addScaledVector(actualDirection, speedDelta);
 
                     const enemyBox = new THREE.Box3().setFromCenterAndSize(
                         new THREE.Vector3(enemy.position.x, enemy.position.y, enemy.position.z),
@@ -1537,13 +1612,40 @@
                             break;
                         }
                     }
+
                     if (collided) {
                         enemy.position.copy(prevPos);
-                        if (enemy.userData.path && enemy.userData.path.length > 0) {
-                            enemy.userData.path.shift();
+                        enemy.userData.collisionCounter++;
+
+                        const movedDistance = prevPos.distanceTo(enemy.userData.lastPosition);
+                        if (movedDistance < 0.05) {
+                            enemy.userData.stuckCounter++;
+                        } else {
+                            enemy.userData.stuckCounter = 0;
                         }
-                        enemy.userData.pathRecalcTimer = 0;
+
+                        if (enemy.userData.stuckCounter > 5 || enemy.userData.collisionCounter > 3) {
+                            enemy.userData.path = [];
+                            enemy.userData.pathTargetKey = null;
+                            enemy.userData.pathRecalcTimer = 0;
+                            enemy.userData.collisionCounter = 0;
+
+                            const escapeDir = findAlternativeDirection(enemy.position, moveDirection, speedDelta);
+                            if (escapeDir) {
+                                enemy.position.addScaledVector(escapeDir, speedDelta * 0.5);
+                            }
+                        } else {
+                            if (enemy.userData.path && enemy.userData.path.length > 0) {
+                                enemy.userData.path.shift();
+                            }
+                            enemy.userData.pathRecalcTimer = 0;
+                        }
+                    } else {
+                        enemy.userData.stuckCounter = 0;
+                        enemy.userData.collisionCounter = Math.max(0, enemy.userData.collisionCounter - 1);
                     }
+
+                    enemy.userData.lastPosition.copy(enemy.position);
                 }
 
                 enemy.position.x = Math.max(-48, Math.min(48, enemy.position.x));
