@@ -174,30 +174,6 @@
             text-shadow: 0 0 8px rgba(255, 80, 80, 0.6);
         }
 
-        #radar {
-            position: absolute;
-            right: 24px;
-            bottom: 24px;
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            border: 2px solid rgba(0, 255, 200, 0.5);
-            background: radial-gradient(circle, rgba(0, 40, 60, 0.75) 0%, rgba(0, 10, 20, 0.85) 65%, rgba(0, 0, 0, 0.9) 100%);
-            box-shadow: 0 0 25px rgba(0, 255, 200, 0.25);
-            display: none;
-            z-index: 1000;
-        }
-
-        #radar.active {
-            display: block;
-            animation: pulse 1.2s ease-in-out infinite alternate;
-        }
-
-        @keyframes pulse {
-            from { box-shadow: 0 0 18px rgba(0, 255, 200, 0.2); }
-            to { box-shadow: 0 0 30px rgba(0, 255, 200, 0.5); }
-        }
-
         #wave-alert, #medkit-alert {
             position: absolute;
             left: 50%;
@@ -467,7 +443,6 @@
             </div>
             <div id="difficulty-indicator" class="status-banner" style="display: none;">Armed Enemies Approaching!</div>
         </div>
-        <canvas id="radar" width="180" height="180"></canvas>
         <div id="wave-alert"></div>
         <div id="medkit-alert"></div>
         <div id="mode-indicator">First Person</div>
@@ -484,7 +459,7 @@
             <div class="control-item"><span class="key">R</span><span class="control-desc">Reload</span></div>
             <div class="control-item"><span class="key">Tab</span><span class="control-desc">Toggle Third-Person View</span></div>
             <div class="control-item"><span class="key">ESC</span><span class="control-desc">Pause</span></div>
-            <p style="color: #ffaa00; margin-top: 20px;">Battle through escalating waves, collect medkits to recover, and unlock radar intel after 15 kills.</p>
+            <p style="color: #ffaa00; margin-top: 20px;">Battle through escalating waves and collect medkits to recover.</p>
             <button onclick="startGame()">Click to Start</button>
         </div>
         <div id="pause-menu">
@@ -531,10 +506,6 @@
         const fireRateMultipliers = [1, 0.85, 0.6, 0.4];
         const fireRateShotsPerSecond = [3.3, 4.0, 5.5, 7.5];
         let rapidFireEnabled = false;
-        let radarEnabled = false;
-        let radarCanvas;
-        let radarCtx;
-        let radarDeviceRatio = 1;
         let lastDamageTime = 0;
         const healthRegenDelay = 2000;
         const healthRegenRate = 4; // per second
@@ -597,12 +568,6 @@
             renderer.setClearColor(0x03030f);
             document.getElementById('game-container').appendChild(renderer.domElement);
 
-            radarCanvas = document.getElementById('radar');
-            radarCtx = radarCanvas.getContext('2d');
-            radarDeviceRatio = window.devicePixelRatio || 1;
-            radarCanvas.width = radarCanvas.clientWidth * radarDeviceRatio;
-            radarCanvas.height = radarCanvas.clientHeight * radarDeviceRatio;
-            radarCtx.setTransform(radarDeviceRatio, 0, 0, radarDeviceRatio, 0, 0);
             lastDamageTime = Date.now();
             lastMedkitSpawn = Date.now();
 
@@ -1724,10 +1689,6 @@
                 }, 3000);
             }
 
-            if (!radarEnabled && kills >= 15) {
-                enableRadar('Radar Online');
-            }
-
             if (Math.random() < 0.18) {
                 spawnMedkit(enemy.position);
             }
@@ -1892,12 +1853,8 @@
             const rapidFireLabel = document.getElementById('rapid-fire-label');
             rapidFireLabel.textContent = rapidFireEnabled ? 'Online' : 'Offline';
             rapidFireLabel.classList.toggle('active', rapidFireEnabled);
-
-            if (!radarEnabled && kills >= 15) {
-                enableRadar('Radar Online');
-            }
         }
-        
+
         function gameOver() {
             gameStarted = false;
             gamePaused = true;
@@ -1966,46 +1923,6 @@
             if (now - lastDamageTime > healthRegenDelay) {
                 health = Math.min(maxHealth, health + healthRegenRate * delta);
                 updateHUD();
-            }
-        }
-
-        function enableRadar(message) {
-            if (radarEnabled) return;
-            radarEnabled = true;
-            if (radarCanvas) {
-                radarCanvas.classList.add('active');
-            }
-
-            // Arm all existing enemies
-            enemies.forEach(enemy => {
-                if (!enemy.userData.isArmed) {
-                    enemy.userData.isArmed = true;
-
-                    // Add weapon to enemy if not already armed
-                    const weaponGroup = new THREE.Group();
-                    const gunBodyGeometry = new THREE.BoxGeometry(0.05, 0.05, 0.35);
-                    const gunMaterial = new THREE.MeshStandardMaterial({
-                        color: 0x222222,
-                        roughness: 0.25,
-                        metalness: 0.9
-                    });
-                    const gunBody = new THREE.Mesh(gunBodyGeometry, gunMaterial);
-                    weaponGroup.add(gunBody);
-
-                    const barrelGeometry = new THREE.CylinderGeometry(0.012, 0.012, 0.12, 8);
-                    const barrel = new THREE.Mesh(barrelGeometry, gunMaterial);
-                    barrel.rotation.x = Math.PI / 2;
-                    barrel.position.z = 0.24;
-                    weaponGroup.add(barrel);
-
-                    weaponGroup.position.set(0.4, 0.8, 0);
-                    weaponGroup.rotation.y = Math.PI / 2;
-                    enemy.add(weaponGroup);
-                }
-            });
-
-            if (message) {
-                showWaveAlert(message);
             }
         }
 
@@ -2162,80 +2079,6 @@
             return candidate.clone();
         }
 
-        function updateRadar() {
-            if (!radarEnabled || !radarCtx) return;
-
-            const width = radarCanvas.clientWidth;
-            const height = radarCanvas.clientHeight;
-            radarCtx.clearRect(0, 0, width, height);
-            const baseLineWidth = 2 / radarDeviceRatio;
-
-            const centerX = width / 2;
-            const centerY = height / 2;
-            const radius = width / 2 - 6;
-
-            radarCtx.strokeStyle = 'rgba(0, 255, 200, 0.35)';
-            radarCtx.lineWidth = baseLineWidth;
-            radarCtx.beginPath();
-            radarCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-            radarCtx.stroke();
-
-            radarCtx.beginPath();
-            radarCtx.moveTo(centerX - radius, centerY);
-            radarCtx.lineTo(centerX + radius, centerY);
-            radarCtx.moveTo(centerX, centerY - radius);
-            radarCtx.lineTo(centerX, centerY + radius);
-            radarCtx.stroke();
-
-            const cosYaw = Math.cos(yaw);
-            const sinYaw = Math.sin(yaw);
-            const scale = radius / 60;
-
-            enemies.forEach(enemy => {
-                const dx = enemy.position.x - yawObject.position.x;
-                const dz = enemy.position.z - yawObject.position.z;
-                let rx = dx * cosYaw - dz * sinYaw;
-                let ry = dx * sinYaw + dz * cosYaw;
-                const distance = Math.sqrt(rx * rx + ry * ry);
-                if (distance > 60) {
-                    const ratio = 60 / distance;
-                    rx *= ratio;
-                    ry *= ratio;
-                }
-                const x = centerX + rx * scale;
-                const y = centerY + ry * scale;
-                radarCtx.fillStyle = enemy.userData.isArmed ? '#ff4f78' : '#ffb347';
-                radarCtx.beginPath();
-                radarCtx.arc(x, y, enemy.userData.isArmed ? 4 : 3, 0, Math.PI * 2);
-                radarCtx.fill();
-            });
-
-            medkits.forEach(medkit => {
-                const dx = medkit.position.x - yawObject.position.x;
-                const dz = medkit.position.z - yawObject.position.z;
-                let rx = dx * cosYaw - dz * sinYaw;
-                let ry = dx * sinYaw + dz * cosYaw;
-                const distance = Math.sqrt(rx * rx + ry * ry);
-                if (distance > 60) {
-                    const ratio = 60 / distance;
-                    rx *= ratio;
-                    ry *= ratio;
-                }
-                const x = centerX + rx * scale;
-                const y = centerY + ry * scale;
-                radarCtx.fillStyle = '#00ffcc';
-                radarCtx.beginPath();
-                radarCtx.arc(x, y, 3, 0, Math.PI * 2);
-                radarCtx.fill();
-            });
-
-            radarCtx.strokeStyle = 'rgba(0, 255, 255, 0.4)';
-            radarCtx.beginPath();
-            radarCtx.moveTo(centerX, centerY);
-            radarCtx.lineTo(centerX, centerY - radius + 12);
-            radarCtx.stroke();
-        }
-
         function updateEnvironment(delta, elapsedTime) {
             for (const animator of environmentAnimators) {
                 animator(delta, elapsedTime);
@@ -2257,7 +2100,6 @@
             updateShooting();
             updateEnvironment(delta, elapsed);
             updateCameraPerspective(delta);
-            updateRadar();
 
             renderer.render(scene, camera);
         }
