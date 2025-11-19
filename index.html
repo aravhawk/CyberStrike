@@ -1975,6 +1975,35 @@
             if (radarCanvas) {
                 radarCanvas.classList.add('active');
             }
+
+            // Arm all existing enemies
+            enemies.forEach(enemy => {
+                if (!enemy.userData.isArmed) {
+                    enemy.userData.isArmed = true;
+
+                    // Add weapon to enemy if not already armed
+                    const weaponGroup = new THREE.Group();
+                    const gunBodyGeometry = new THREE.BoxGeometry(0.05, 0.05, 0.35);
+                    const gunMaterial = new THREE.MeshStandardMaterial({
+                        color: 0x222222,
+                        roughness: 0.25,
+                        metalness: 0.9
+                    });
+                    const gunBody = new THREE.Mesh(gunBodyGeometry, gunMaterial);
+                    weaponGroup.add(gunBody);
+
+                    const barrelGeometry = new THREE.CylinderGeometry(0.012, 0.012, 0.12, 8);
+                    const barrel = new THREE.Mesh(barrelGeometry, gunMaterial);
+                    barrel.rotation.x = Math.PI / 2;
+                    barrel.position.z = 0.24;
+                    weaponGroup.add(barrel);
+
+                    weaponGroup.position.set(0.4, 0.8, 0);
+                    weaponGroup.rotation.y = Math.PI / 2;
+                    enemy.add(weaponGroup);
+                }
+            });
+
             if (message) {
                 showWaveAlert(message);
             }
@@ -2311,6 +2340,10 @@
             health = maxHealth;
             ammo = maxAmmo;
             lastDamageTime = Date.now();
+            radarEnabled = false;
+            if (radarCanvas) {
+                radarCanvas.classList.remove('active');
+            }
 
             for (let i = medkits.length - 1; i >= 0; i--) {
                 scene.remove(medkits[i]);
