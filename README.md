@@ -20,7 +20,7 @@ A browser-based first-person shooter built with Three.js. Survive waves of enemy
 - Wave-based progression with escalating difficulty
 - Health regenerates after 2 seconds without taking damage
 - Collect medkits dropped by enemies for instant healing
-- Fire rate increases at 25, 35, and 45 kills
+- Fire rate increases at 25, 35, and 45 kills (or waves 3, 5, and 6)
 - Rapid fire unlocks at 25 kills or wave 4
 - Armed enemies (purple) appear after 15 kills and can shoot back
 

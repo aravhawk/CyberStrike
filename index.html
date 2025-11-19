@@ -1845,9 +1845,7 @@
             const fireRateLevel = getFireRateLevel();
             document.getElementById('fire-rate-label').textContent = `Level ${fireRateLevel}`;
 
-            const multiplier = fireRateMultipliers[fireRateLevel - 1];
-            const shotsPerSecond = (1000 / (baseFireRate * multiplier)).toFixed(1);
-            document.getElementById('fire-rate-stat').textContent = shotsPerSecond;
+            document.getElementById('fire-rate-stat').textContent = fireRateShotsPerSecond[fireRateLevel - 1];
 
             rapidFireEnabled = kills >= 25 || wave >= 4;
             const rapidFireLabel = document.getElementById('rapid-fire-label');
@@ -2025,7 +2023,6 @@
                         medkit.remove(medkit.userData.light);
                     }
                     medkits.splice(i, 1);
-                    lastMedkitSpawn = now;
                     updateHUD();
                 }
             }
@@ -2076,7 +2073,14 @@
                     return candidate.clone();
                 }
             }
-            return candidate.clone();
+            // Fallback: return position far from player even if near obstacle
+            const angle = Math.random() * Math.PI * 2;
+            const distance = minDistance + Math.random() * 20;
+            return new THREE.Vector3(
+                playerPosition.x + Math.cos(angle) * distance,
+                0,
+                playerPosition.z + Math.sin(angle) * distance
+            );
         }
 
         function updateEnvironment(delta, elapsedTime) {
@@ -2159,13 +2163,6 @@
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-
-            if (radarCanvas && radarCtx) {
-                radarDeviceRatio = window.devicePixelRatio || 1;
-                radarCanvas.width = radarCanvas.clientWidth * radarDeviceRatio;
-                radarCanvas.height = radarCanvas.clientHeight * radarDeviceRatio;
-                radarCtx.setTransform(radarDeviceRatio, 0, 0, radarDeviceRatio, 0, 0);
-            }
         }
         
         function startGame() {
@@ -2182,10 +2179,6 @@
             health = maxHealth;
             ammo = maxAmmo;
             lastDamageTime = Date.now();
-            radarEnabled = false;
-            if (radarCanvas) {
-                radarCanvas.classList.remove('active');
-            }
 
             for (let i = medkits.length - 1; i >= 0; i--) {
                 scene.remove(medkits[i]);
