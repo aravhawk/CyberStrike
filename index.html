@@ -180,6 +180,59 @@
             text-shadow: 0 0 8px rgba(255, 80, 80, 0.6);
         }
 
+        #combo-container {
+            margin-top: 10px;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        #combo-text {
+            color: #ffbb00;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 187, 0, 0.8);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .combo-bar-shell {
+            width: 100%;
+            height: 6px;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(255, 187, 0, 0.3);
+            border-radius: 3px;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+
+        #combo-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffaa00 0%, #ffee00 100%);
+            width: 100%;
+            box-shadow: 0 0 8px rgba(255, 200, 0, 0.8);
+            transform-origin: left;
+        }
+
+        .dash-bar-shell {
+            width: 100%;
+            height: 8px;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 4px;
+            margin-top: 6px;
+            overflow: hidden;
+            display: flex;
+        }
+
+        #dash-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00bbff 0%, #00ffff 100%);
+            width: 100%;
+            box-shadow: 0 0 8px rgba(0, 255, 255, 0.8);
+            transition: width 0.1s linear;
+        }
+
         #wave-alert, #medkit-alert {
             position: absolute;
             left: 50%;
@@ -464,6 +517,25 @@
                 <span>FPS</span>
                 <span class="status-value" id="fps-counter">0</span>
             </div>
+            <div style="margin-top: 10px;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; color: #00ffff; text-transform:uppercase;">
+                    <span>Dash</span>
+                    <span id="dash-text">Ready</span>
+                </div>
+                <div class="dash-bar-shell">
+                    <div id="dash-bar-fill" style="width: 100%;"></div>
+                </div>
+            </div>
+            <div id="combo-container">
+                <div id="combo-text">Combo x1</div>
+                <div class="combo-bar-shell">
+                    <div id="combo-bar-fill" style="transform: scaleX(1);"></div>
+                </div>
+            </div>
+            <div id="powerups-container" style="display: flex; flex-direction: column; gap: 5px; margin-top: 10px;">
+                <div id="shield-indicator" class="status-banner" style="display: none; color: #00aaff; border-color: #00aaff; background: rgba(0, 170, 255, 0.15); box-shadow: 0 0 20px rgba(0, 170, 255, 0.3);">SHIELD ACTIVE</div>
+                <div id="overdrive-indicator" class="status-banner" style="display: none; color: #ff00ff; border-color: #ff00ff; background: rgba(255, 0, 255, 0.15); box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);">OVERDRIVE</div>
+            </div>
         </div>
         <div id="wave-alert"></div>
         <div id="medkit-alert"></div>
@@ -477,7 +549,7 @@
             <div class="control-item"><span class="key">Mouse</span><span class="control-desc">Look Around</span></div>
             <div class="control-item"><span class="key">Click</span><span class="control-desc">Shoot</span></div>
             <div class="control-item"><span class="key">Space</span><span class="control-desc">Jump</span></div>
-            <div class="control-item"><span class="key">Shift</span><span class="control-desc">Sprint</span></div>
+            <div class="control-item"><span class="key">Shift</span><span class="control-desc">Dash</span></div>
             <div class="control-item"><span class="key">R</span><span class="control-desc">Reload</span></div>
             <div class="control-item"><span class="key">Tab</span><span class="control-desc">Toggle Third-Person View</span></div>
             <div class="control-item"><span class="key">ESC</span><span class="control-desc">Pause</span></div>
@@ -498,6 +570,7 @@
         let enemyBullets = [];
         let particles = [];
         let medkits = [];
+        let powerups = [];
         let environmentAnimators = [];
         let score = 0;
         const maxHealth = 100;
@@ -512,11 +585,55 @@
         let isReloading = false;
         let clock = new THREE.Clock();
 
+        // Gameplay state
+        let dashCooldown = 0;
+        let isDashing = false;
+        let dashVelocity = new THREE.Vector3();
+        let dashTime = 0;
+        const DASH_SPEED = 45;
+        const DASH_DURATION = 0.15;
+        const DASH_COOLDOWN_TIME = 2.0;
+
+        let comboMultiplier = 1;
+        let comboTimeLeft = 0;
+        const COMBO_DURATION = 3.0; // Seconds to maintain combo
+
+        let screenShake = 0;
+
+        let shieldActive = false;
+        let shieldTimeLeft = 0;
+        let overdriveActive = false;
+        let overdriveTimeLeft = 0;
+
         // FPS counter variables
         let frames = 0;
         let lastFPSUpdateTime = 0;
 
         // --- Pools and Shared Geometries ---
+        const sharedEnemyGeometry = new THREE.CylinderGeometry(0.6, 0.8, 2.2, 12);
+        const sharedSpeedsterGeometry = new THREE.CylinderGeometry(0.4, 0.5, 1.8, 10);
+        const sharedBruteGeometry = new THREE.CylinderGeometry(0.9, 1.1, 2.6, 16);
+
+        const enemyMaterialProto = new THREE.MeshStandardMaterial({
+            color: 0xff355a, emissive: 0xff2a5e, emissiveIntensity: 0.4, roughness: 0.35, metalness: 0.8
+        });
+        const speedsterMaterialProto = new THREE.MeshStandardMaterial({
+            color: 0xffaa00, emissive: 0xff8800, emissiveIntensity: 0.6, roughness: 0.2, metalness: 0.6
+        });
+        const bruteMaterialProto = new THREE.MeshStandardMaterial({
+            color: 0x880000, emissive: 0x550000, emissiveIntensity: 0.2, roughness: 0.8, metalness: 0.9
+        });
+
+        const sharedVisorGeometry = new THREE.TorusGeometry(0.5, 0.08, 12, 24);
+        const sharedSpeedsterVisorGeometry = new THREE.TorusGeometry(0.35, 0.06, 10, 20);
+        const sharedBruteVisorGeometry = new THREE.TorusGeometry(0.7, 0.12, 14, 28);
+
+        const sharedVisorMaterial = new THREE.MeshBasicMaterial({ color: 0xfff14a, transparent: true, opacity: 0.6 });
+
+        const sharedGunBodyGeometry = new THREE.BoxGeometry(0.05, 0.05, 0.35);
+        const sharedGunBarrelGeometry = new THREE.CylinderGeometry(0.01, 0.01, 0.25);
+        const sharedGunMaterial = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.25, metalness: 0.9 });
+
         const sharedBulletGeometry = new THREE.SphereGeometry(0.05, 4, 4);
         const sharedBulletMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00, emissive: 0xffff00 });
         const bulletPool = [];
@@ -1354,32 +1471,67 @@
         function createEnemy() {
             const spawnPosition = getSpawnPosition();
 
-            const enemyGeometry = new THREE.CylinderGeometry(0.6, 0.8, 2.2, 12);
-            const enemyMaterial = new THREE.MeshStandardMaterial({
-                color: 0xff355a,
-                emissive: 0xff2a5e,
-                emissiveIntensity: 0.4,
-                roughness: 0.35,
-                metalness: 0.8
-            });
-            const enemy = new THREE.Mesh(enemyGeometry, enemyMaterial);
+            // Determine enemy type based on wave
+            let type = 'grunt';
+            const r = Math.random();
+            if (wave > 2 && r < 0.3) {
+                type = 'speedster';
+            } else if (wave > 4 && r > 0.8) {
+                type = 'brute';
+            }
+
+            let geometry, material, visorGeo, yOffset, visorYOffset;
+            let hpMult = 1, speedMult = 1, scaleMult = 1;
+
+            if (type === 'speedster') {
+                geometry = sharedSpeedsterGeometry;
+                material = speedsterMaterialProto.clone();
+                visorGeo = sharedSpeedsterVisorGeometry;
+                hpMult = 0.5;
+                speedMult = 1.8;
+                yOffset = 0.9;
+                visorYOffset = 1.1;
+                scaleMult = 0.8;
+            } else if (type === 'brute') {
+                geometry = sharedBruteGeometry;
+                material = bruteMaterialProto.clone();
+                visorGeo = sharedBruteVisorGeometry;
+                hpMult = 2.5;
+                speedMult = 0.6;
+                yOffset = 1.3;
+                visorYOffset = 1.7;
+                scaleMult = 1.2;
+            } else { // grunt
+                geometry = sharedEnemyGeometry;
+                material = enemyMaterialProto.clone();
+                visorGeo = sharedVisorGeometry;
+                yOffset = 1.1;
+                visorYOffset = 1.4;
+            }
+
+            const enemy = new THREE.Mesh(geometry, material);
             enemy.castShadow = true;
             enemy.receiveShadow = true;
-            enemy.position.set(spawnPosition.x, 1.1, spawnPosition.z);
+            enemy.position.set(spawnPosition.x, yOffset, spawnPosition.z);
 
-            const baseHealth = 110 + (wave - 1) * 20;
+            const baseHealth = (110 + (wave - 1) * 20) * hpMult;
             enemy.userData.maxHealth = baseHealth;
             enemy.userData.health = baseHealth;
+            enemy.userData.type = type;
+            enemy.userData.scaleMult = scaleMult;
 
-            const speedMultiplier = 1 + (wave - 1) * 0.18 + Math.min(0.25, kills * 0.02);
-            enemy.userData.speed = (Math.random() * 1.5 + 1.4) * speedMultiplier;
+            const globalSpeedMultiplier = 1 + (wave - 1) * 0.18 + Math.min(0.25, kills * 0.02);
+            enemy.userData.speed = (Math.random() * 1.5 + 1.4) * globalSpeedMultiplier * speedMult;
 
-            enemy.userData.isArmed = kills >= 15;
+            // Only grunts and brutes can be armed after wave 3/kills 15
+            enemy.userData.isArmed = (kills >= 15) && (type !== 'speedster' || wave > 6);
             enemy.userData.lastShotTime = Date.now();
-            enemy.userData.shootCooldown = Math.max(1200, 2600 - wave * 160);
-            enemy.userData.hitGlow = new THREE.PointLight(0xff3355, 0.8, 6);
-            enemy.userData.hitGlow.position.y = 1.2;
+            enemy.userData.shootCooldown = Math.max(1200, 2600 - wave * 160) * (type === 'brute' ? 1.5 : 1);
+
+            enemy.userData.hitGlow = new THREE.PointLight(type === 'speedster' ? 0xffaa00 : (type === 'brute' ? 0xff0000 : 0xff3355), 0.8, 6 * scaleMult);
+            enemy.userData.hitGlow.position.y = visorYOffset - 0.2;
             enemy.add(enemy.userData.hitGlow);
+
             enemy.userData.path = [];
             enemy.userData.pathTargetKey = null;
             enemy.userData.pathRecalcTimer = 0;
@@ -1387,39 +1539,32 @@
             enemy.userData.lastPosition = spawnPosition.clone();
             enemy.userData.collisionCounter = 0;
 
-            const visorGeometry = new THREE.TorusGeometry(0.5, 0.08, 12, 24);
-            const visorMaterial = new THREE.MeshBasicMaterial({
-                color: 0xfff14a,
-                transparent: true,
-                opacity: 0.6
-            });
-            const visor = new THREE.Mesh(visorGeometry, visorMaterial);
+            const visor = new THREE.Mesh(visorGeo, sharedVisorMaterial);
             visor.rotation.x = Math.PI / 2;
-            visor.position.y = 1.4;
+            visor.position.y = visorYOffset;
             enemy.add(visor);
 
             if (enemy.userData.isArmed) {
                 const weaponGroup = new THREE.Group();
-                const gunBodyGeometry = new THREE.BoxGeometry(0.05, 0.05, 0.35);
-                const gunMaterial = new THREE.MeshStandardMaterial({
-                    color: 0x222222,
-                    roughness: 0.25,
-                    metalness: 0.9
-                });
-                const gunBody = new THREE.Mesh(gunBodyGeometry, gunMaterial);
+                const gunBody = new THREE.Mesh(sharedGunBodyGeometry, sharedGunMaterial);
                 weaponGroup.add(gunBody);
 
-                const gunBarrelGeometry = new THREE.CylinderGeometry(0.01, 0.01, 0.25);
-                const gunBarrel = new THREE.Mesh(gunBarrelGeometry, gunMaterial);
+                const gunBarrel = new THREE.Mesh(sharedGunBarrelGeometry, sharedGunMaterial);
                 gunBarrel.rotation.x = Math.PI / 2;
                 gunBarrel.position.z = -0.25;
                 weaponGroup.add(gunBarrel);
 
-                weaponGroup.position.set(0.4, 0.2, 0.5);
+                weaponGroup.position.set(0.4 * scaleMult, 0.2 * scaleMult, 0.5 * scaleMult);
                 enemy.add(weaponGroup);
                 enemy.userData.weapon = weaponGroup;
-                enemy.material.color.setRGB(0.65, 0.2, 1);
-                enemy.material.emissive.setRGB(0.2, 0.05, 0.4);
+
+                if (type === 'grunt') {
+                    enemy.material.color.setRGB(0.65, 0.2, 1);
+                    enemy.material.emissive.setRGB(0.2, 0.05, 0.4);
+                } else if (type === 'brute') {
+                    enemy.material.color.setRGB(0.4, 0.1, 0.6);
+                    enemy.material.emissive.setRGB(0.1, 0.0, 0.2);
+                }
             }
 
             enemies.push(enemy);
@@ -1437,10 +1582,13 @@
             if (!gameStarted || gamePaused || isReloading || ammo <= 0) return;
 
             const now = Date.now();
-            const fireRateLevel = getFireRateLevel();
-            const currentFireRate = baseFireRate * fireRateMultipliers[fireRateLevel - 1];
+            const fireRateLevel = overdriveActive ? 4 : getFireRateLevel();
+            const currentFireRate = baseFireRate * (overdriveActive ? 0.2 : fireRateMultipliers[fireRateLevel - 1]);
             if (now - lastShotTime < currentFireRate) return;
             lastShotTime = now;
+
+            // Screen shake
+            screenShake = 0.05;
 
             // Weapon recoil animation
             weaponRecoil = 0.2;
@@ -1475,12 +1623,14 @@
             createMuzzleParticles();
             
             // Update ammo
-            ammo--;
-            updateHUD();
+            if (!overdriveActive) {
+                ammo--;
+                updateHUD();
 
-            // Auto reload
-            if (ammo === 0) {
-                reload();
+                // Auto reload
+                if (ammo === 0) {
+                    reload();
+                }
             }
         }
         
@@ -1575,8 +1725,10 @@
             }
         }
 
-        function showHitIndicator() {
+        function showHitIndicator(isHeadshot = false) {
             const hitIndicator = document.getElementById('hit-indicator');
+            hitIndicator.textContent = isHeadshot ? 'HEADSHOT!' : 'HIT!';
+            hitIndicator.style.color = isHeadshot ? '#ffbb00' : '#ff0000';
             hitIndicator.style.opacity = '1';
             setTimeout(() => {
                 hitIndicator.style.opacity = '0';
@@ -1621,12 +1773,38 @@
             if (keys['d'] || keys['arrowright']) direction.x += 1;
             
             direction.normalize();
-            
-            // Apply sprint
-            const currentSpeed = keys['shift'] ? moveSpeed * 1.5 : moveSpeed;
-            
+
+            if (dashCooldown > 0) {
+                dashCooldown -= delta;
+            }
+            if (dashCooldown < 0) dashCooldown = 0;
+
+            if (keys['shift'] && dashCooldown === 0 && direction.length() > 0 && !isDashing) {
+                isDashing = true;
+                dashTime = DASH_DURATION;
+                dashCooldown = DASH_COOLDOWN_TIME;
+
+                dashVelocity.copy(direction);
+                dashVelocity.applyQuaternion(yawObject.quaternion);
+                dashVelocity.y = 0;
+                dashVelocity.normalize().multiplyScalar(DASH_SPEED);
+
+                createHitParticles(yawObject.position, 0x00ffff);
+            }
+
+            if (isDashing) {
+                dashTime -= delta;
+                if (dashTime <= 0) {
+                    isDashing = false;
+                }
+            }
+
+            const currentSpeed = moveSpeed;
+
             // Move player relative to camera direction
-            if (direction.length() > 0) {
+            if (isDashing) {
+                yawObject.position.add(dashVelocity.clone().multiplyScalar(delta));
+            } else if (direction.length() > 0) {
                 tempVec2.copy(direction);
                 tempVec2.applyQuaternion(yawObject.quaternion);
                 tempVec2.y = 0;
@@ -1849,15 +2027,18 @@
                 }
 
                 if (distanceToPlayer < 2.4) {
-                    const damageRate = enemy.userData.isArmed ? 32 : 24;
-                    health -= damageRate * delta;
-                    lastDamageTime = currentTime;
-                    showDamageOverlay();
-                    updateHUD();
+                    if (!shieldActive) {
+                        const damageRate = enemy.userData.isArmed ? 32 : 24;
+                        health -= damageRate * delta;
+                        lastDamageTime = currentTime;
+                        showDamageOverlay();
+                        screenShake = 0.1;
+                        updateHUD();
 
-                    if (health <= 0) {
-                        gameOver();
-                        return;
+                        if (health <= 0) {
+                            gameOver();
+                            return;
+                        }
                     }
                 }
 
@@ -1877,7 +2058,16 @@
 
             kills++;
             enemiesRemainingInWave = Math.max(0, enemiesRemainingInWave - 1);
-            score += 100 + wave * 25;
+
+            // Handle Combo
+            if (comboTimeLeft > 0) {
+                comboMultiplier = Math.min(10, comboMultiplier + 1);
+            } else {
+                comboMultiplier = 1;
+            }
+            comboTimeLeft = COMBO_DURATION;
+
+            score += (100 + wave * 25) * comboMultiplier;
             updateHUD();
 
             if (kills === 15) {
@@ -1890,6 +2080,8 @@
 
             if (Math.random() < 0.18) {
                 spawnMedkit(enemy.position);
+            } else if (Math.random() < 0.08) {
+                spawnPowerup(enemy.position);
             }
 
             checkWaveStatus();
@@ -1927,9 +2119,20 @@
 
                         if (distance < 1.5) {
                             bullet.userData.hasHit = true;
-                            enemy.userData.health -= 50;
-                            showHitIndicator();
-                            createHitParticles(bullet.position);
+
+                            // Headshot detection (rough approximation based on height relative to enemy center)
+                            const isHeadshot = (bullet.position.y - enemy.position.y) > 0.6;
+
+                            const damage = isHeadshot ? 100 : 50;
+                            enemy.userData.health -= damage;
+
+                            if (isHeadshot) {
+                                showHitIndicator(true);
+                            } else {
+                                showHitIndicator();
+                            }
+
+                            createHitParticles(bullet.position, isHeadshot ? 0xffea00 : 0xff0000);
                             releaseBullet(bullet);
                             bullets.splice(i, 1);
                             break;
@@ -1971,17 +2174,21 @@
 
                     if (distance < 1.5) {
                         bullet.userData.hasHit = true;
-                        health -= 10;
-                        lastDamageTime = Date.now();
-                        showDamageOverlay();
+                        if (!shieldActive) {
+                            health -= 10;
+                            lastDamageTime = Date.now();
+                            showDamageOverlay();
+                            screenShake = 0.15;
+                            updateHUD();
+
+                            if (health <= 0) {
+                                gameOver();
+                            }
+                        }
                         createHitParticles(bullet.position, 0x00ff88);
                         releaseEnemyBullet(bullet);
                         enemyBullets.splice(i, 1);
-                        updateHUD();
 
-                        if (health <= 0) {
-                            gameOver();
-                        }
                         continue;
                     }
                 }
@@ -2056,6 +2263,21 @@
             const rapidFireLabel = document.getElementById('rapid-fire-label');
             rapidFireLabel.textContent = rapidFireEnabled ? 'Online' : 'Offline';
             rapidFireLabel.classList.toggle('active', rapidFireEnabled);
+
+            // Dash Update
+            const dashPercent = Math.max(0, Math.min(1, 1 - (dashCooldown / DASH_COOLDOWN_TIME)));
+            document.getElementById('dash-bar-fill').style.width = `${dashPercent * 100}%`;
+            document.getElementById('dash-text').textContent = dashPercent >= 1 ? 'Ready' : 'Recharging...';
+
+            // Combo Update
+            if (comboTimeLeft > 0) {
+                document.getElementById('combo-container').style.opacity = '1';
+                document.getElementById('combo-text').textContent = `Combo x${comboMultiplier}`;
+                const comboPercent = Math.max(0, Math.min(1, comboTimeLeft / COMBO_DURATION));
+                document.getElementById('combo-bar-fill').style.transform = `scaleX(${comboPercent})`;
+            } else {
+                document.getElementById('combo-container').style.opacity = '0';
+            }
         }
 
         function gameOver() {
@@ -2124,6 +2346,16 @@
             cameraOffsetTarget.copy(thirdPerson ? thirdPersonCameraOffset : firstPersonCameraOffset);
             cameraCurrentOffset.lerp(cameraOffsetTarget, Math.min(1, delta * lerpSpeed));
             camera.position.copy(cameraCurrentOffset);
+
+            if (screenShake > 0) {
+                const shakeIntensity = screenShake * 2.0;
+                camera.position.x += (Math.random() - 0.5) * shakeIntensity;
+                camera.position.y += (Math.random() - 0.5) * shakeIntensity;
+                camera.position.z += (Math.random() - 0.5) * shakeIntensity;
+                screenShake -= delta;
+                if (screenShake < 0) screenShake = 0;
+            }
+
             if (thirdPerson) {
                 camera.position.y = Math.max(camera.position.y, 0.2);
             }
@@ -2163,6 +2395,48 @@
             medkitAlertTimeout = setTimeout(() => {
                 element.style.display = 'none';
             }, 1800);
+        }
+
+        function spawnPowerup(originPosition) {
+            const powerupTypes = ['shield', 'overdrive'];
+            const type = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
+
+            const powerupGeometry = new THREE.OctahedronGeometry(0.4);
+            const color = type === 'shield' ? 0x00aaff : 0xff00ff;
+            const powerupMaterial = new THREE.MeshStandardMaterial({
+                color: color,
+                emissive: color,
+                emissiveIntensity: 0.8,
+                metalness: 0.5,
+                roughness: 0.1
+            });
+            const powerup = new THREE.Mesh(powerupGeometry, powerupMaterial);
+            powerup.castShadow = true;
+
+            const spawnVector = originPosition ? originPosition.clone() : getSpawnPosition(6);
+            if (originPosition) {
+                spawnVector.x += (Math.random() - 0.5) * 4;
+                spawnVector.z += (Math.random() - 0.5) * 4;
+            }
+
+            powerup.position.set(
+                THREE.MathUtils.clamp(spawnVector.x, -48, 48),
+                0.6,
+                THREE.MathUtils.clamp(spawnVector.z, -48, 48)
+            );
+
+            const glow = new THREE.PointLight(color, 1.5, 8);
+            glow.position.y = 0;
+            powerup.add(glow);
+            powerup.userData.light = glow;
+            powerup.userData.type = type;
+            powerup.userData.baseY = powerup.position.y;
+            powerup.userData.floatOffset = Math.random() * Math.PI * 2;
+            powerup.userData.rotationSpeed = 2 + Math.random();
+
+            powerups.push(powerup);
+            scene.add(powerup);
+            showMedkitAlert(type.toUpperCase() + ' DEPLOYED');
         }
 
         function spawnMedkit(originPosition) {
@@ -2238,6 +2512,54 @@
                         medkit.remove(medkit.userData.light);
                     }
                     medkits.splice(i, 1);
+                    updateHUD();
+                }
+            }
+
+            for (let i = powerups.length - 1; i >= 0; i--) {
+                const powerup = powerups[i];
+                powerup.rotation.y += powerup.userData.rotationSpeed * delta;
+                powerup.rotation.x += powerup.userData.rotationSpeed * delta * 0.5;
+                powerup.position.y = powerup.userData.baseY + Math.sin(now * 0.003 + powerup.userData.floatOffset) * 0.2;
+
+                const dx = powerup.position.x - yawObject.position.x;
+                const dz = powerup.position.z - yawObject.position.z;
+                if (Math.hypot(dx, dz) < 1.6) {
+                    score += 50;
+                    if (powerup.userData.type === 'shield') {
+                        shieldActive = true;
+                        shieldTimeLeft = 10.0;
+                        document.getElementById('shield-indicator').style.display = 'block';
+                        showMedkitAlert('SHIELD ACTIVE');
+                    } else if (powerup.userData.type === 'overdrive') {
+                        overdriveActive = true;
+                        overdriveTimeLeft = 8.0;
+                        document.getElementById('overdrive-indicator').style.display = 'block';
+                        showMedkitAlert('OVERDRIVE ENGAGED');
+                    }
+
+                    scene.remove(powerup);
+                    if (powerup.userData.light) {
+                        powerup.remove(powerup.userData.light);
+                    }
+                    powerups.splice(i, 1);
+                    updateHUD();
+                }
+            }
+
+            // Update powerup durations
+            if (shieldTimeLeft > 0) {
+                shieldTimeLeft -= delta;
+                if (shieldTimeLeft <= 0) {
+                    shieldActive = false;
+                    document.getElementById('shield-indicator').style.display = 'none';
+                }
+            }
+            if (overdriveTimeLeft > 0) {
+                overdriveTimeLeft -= delta;
+                if (overdriveTimeLeft <= 0) {
+                    overdriveActive = false;
+                    document.getElementById('overdrive-indicator').style.display = 'none';
                     updateHUD();
                 }
             }
@@ -2328,6 +2650,18 @@
             updateEnvironment(delta, elapsed);
             updateCameraPerspective(delta);
 
+            if (comboTimeLeft > 0) {
+                comboTimeLeft -= delta;
+                if (comboTimeLeft <= 0) {
+                    comboTimeLeft = 0;
+                    comboMultiplier = 1;
+                }
+                updateHUD();
+            } else if (dashCooldown > 0 || isDashing) {
+                // Keep updating HUD while dash is on cooldown to animate the bar
+                updateHUD();
+            }
+
             renderer.render(scene, camera);
         }
         
@@ -2407,6 +2741,18 @@
                 scene.remove(medkits[i]);
             }
             medkits.length = 0;
+            for (let i = powerups.length - 1; i >= 0; i--) {
+                scene.remove(powerups[i]);
+            }
+            powerups.length = 0;
+
+            shieldActive = false;
+            shieldTimeLeft = 0;
+            overdriveActive = false;
+            overdriveTimeLeft = 0;
+            document.getElementById('shield-indicator').style.display = 'none';
+            document.getElementById('overdrive-indicator').style.display = 'none';
+
             lastMedkitSpawn = Date.now();
             updateHUD();
             updateModeIndicator();
