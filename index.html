@@ -454,71 +454,45 @@
             transition: opacity 0.2s;
         }
 
-        /* ===== 1v1 mode styles ===== */
-        #viewport-divider {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 2px;
-            height: 100%;
-            background: #000;
-            box-shadow: 0 0 6px rgba(0, 255, 213, 0.4);
-            transform: translateX(-1px);
-            z-index: 1200;
-            display: none;
-            pointer-events: none;
-        }
-
-        /* When in 1v1 mode, P1 elements get repositioned to the left viewport */
-        body.mode-1v1 #crosshair {
-            left: 25%;
-        }
-        body.mode-1v1 #hud {
-            bottom: 20px;
-            left: 20px;
-            transform: scale(0.78);
-            transform-origin: bottom left;
-        }
-        body.mode-1v1 #damage-overlay {
-            width: 50%;
-        }
-
-        /* P2 UI elements (only visible in 1v1 mode) */
-        #crosshair-2 {
-            position: absolute;
-            top: 50%;
-            left: 75%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            z-index: 1000;
-            display: none;
-        }
-        body.mode-1v1 #crosshair-2 {
-            display: block;
-        }
+        /* ===== 1v1 online mode styles ===== */
+        /* In online 1v1, the opponent's compact HUD is shown on the right.
+           Single fullscreen viewport, single crosshair, single damage overlay. */
 
         #hud-p2 {
             position: absolute;
-            bottom: 20px;
-            right: 20px;
+            top: 80px;
+            right: 24px;
             display: none;
             flex-direction: column;
-            gap: 16px;
-            padding: 20px 24px;
-            background: linear-gradient(135deg, rgba(15, 5, 25, 0.85) 0%, rgba(8, 2, 18, 0.95) 100%);
-            border: 2px solid rgba(255, 80, 200, 0.4);
-            border-right: 4px solid #ff50c8;
+            gap: 8px;
+            padding: 12px 16px;
+            min-width: 220px;
+            background: linear-gradient(135deg, rgba(15, 5, 25, 0.88) 0%, rgba(8, 2, 18, 0.95) 100%);
+            border: 2px solid rgba(255, 80, 200, 0.5);
+            border-top: 4px solid #ff50c8;
             border-radius: 8px;
             backdrop-filter: blur(8px);
-            box-shadow: 0 0 20px rgba(255, 80, 200, 0.15), inset 0 0 15px rgba(255, 80, 200, 0.1);
+            box-shadow: 0 0 20px rgba(255, 80, 200, 0.2), inset 0 0 12px rgba(255, 80, 200, 0.1);
             z-index: 1000;
-            clip-path: polygon(0 0, 100% 0, 100% 100%, 15px 100%, 0 calc(100% - 15px));
-            transform: scale(0.78);
-            transform-origin: bottom right;
         }
         body.mode-1v1 #hud-p2 {
             display: flex;
         }
+        #hud-p2::before {
+            content: 'OPPONENT';
+            font-size: 11px;
+            color: #ff8ee0;
+            letter-spacing: 3px;
+            text-align: center;
+            margin-bottom: 4px;
+            text-shadow: 0 0 8px rgba(255, 142, 224, 0.8);
+        }
+        #hud-p2 .bar-shell { height: 12px; }
+        #hud-p2 .bar-header { font-size: 11px; }
+        #hud-p2 .status-row { font-size: 11px; padding: 4px 8px; }
+        #hud-p2 #status-grid { display: none; }
+        #hud-p2 .dash-bar-shell, #hud-p2 #combo-container-2 { display: none; }
+        #hud-p2 > div:last-child { display: none; }
         #hud-p2 .bar-fill {
             background: linear-gradient(90deg, #ff1f4d 0%, #ff523d 100%);
         }
@@ -537,107 +511,9 @@
             border-left: 2px solid rgba(255, 100, 200, 0.8);
         }
 
-        #top-hud-2 {
-            position: absolute;
-            top: 24px;
-            right: 24px;
-            display: none;
-            gap: 18px;
-            padding: 10px 24px;
-            background: linear-gradient(180deg, rgba(20, 5, 25, 0.9) 0%, rgba(8, 2, 15, 0.7) 100%);
-            border-bottom: 2px solid rgba(255, 100, 200, 0.5);
-            border-radius: 0 0 12px 12px;
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-            font-family: 'Courier New', monospace;
-            color: #ff8ee0;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 12px;
-        }
-        body.mode-1v1 #top-hud-2 {
-            display: flex;
-        }
-        #top-hud-2 span:last-child {
-            font-size: 22px;
-            font-weight: bold;
-            color: #ff8ee0;
-            text-shadow: 0 0 10px rgba(255, 142, 224, 0.8);
-        }
-        body.mode-1v1 #top-hud {
-            left: 24px;
-            transform: none;
-            border-bottom: 2px solid rgba(0, 255, 255, 0.5);
-            border-radius: 0 0 12px 12px;
-            padding: 10px 24px;
-            gap: 18px;
-            clip-path: none;
-        }
-        body.mode-1v1 #top-hud .hud-card span:last-child {
-            font-size: 22px;
-        }
-
-        #damage-overlay-2 {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 50%;
-            height: 100%;
-            background: radial-gradient(circle, transparent 30%, rgba(255, 0, 0, 0.3) 100%);
-            pointer-events: none;
-            z-index: 500;
-            opacity: 0;
-            transition: opacity 0.2s;
-            display: none;
-        }
-        body.mode-1v1 #damage-overlay-2 {
-            display: block;
-        }
-
-        #hit-indicator-2 {
-            position: absolute;
-            top: 50%;
-            left: 75%;
-            transform: translate(-50%, -50%);
-            color: #ff0000;
-            font-size: 24px;
-            font-weight: bold;
-            z-index: 1500;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.1s;
-            display: none;
-        }
-        body.mode-1v1 #hit-indicator-2 {
-            display: block;
-        }
-
-        #mode-indicator-2 {
-            position: absolute;
-            right: 24px;
-            bottom: 24px;
-            left: auto;
-            transform: none;
-            padding: 8px 20px;
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 100, 200, 0.3);
-            border-radius: 999px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #ff8ee0;
-            font-size: 12px;
-            backdrop-filter: blur(10px);
-            z-index: 1500;
-            opacity: 0.6;
-            display: none;
-        }
-        body.mode-1v1 #mode-indicator-2 {
-            display: block;
-        }
-        body.mode-1v1 #mode-indicator {
-            left: 24px;
-            transform: none;
-        }
+        /* top-hud-2, damage-overlay-2, hit-indicator-2, mode-indicator-2: legacy split-screen
+           elements; kept hidden in online 1v1 to avoid breaking JS lookups, but never displayed. */
+        #top-hud-2, #damage-overlay-2, #hit-indicator-2, #mode-indicator-2, #crosshair-2 { display: none !important; }
 
         #mode-select {
             display: flex;
@@ -658,6 +534,16 @@
             background: #ff50c8 !important;
             color: #000 !important;
             box-shadow: 0 0 30px rgba(255, 80, 200, 0.6) !important;
+        }
+        .mode-btn-secondary {
+            background: rgba(200, 200, 200, 0.08) !important;
+            color: rgba(255, 255, 255, 0.75) !important;
+            border-color: rgba(255, 255, 255, 0.3) !important;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.1), inset 0 0 6px rgba(255, 255, 255, 0.05) !important;
+        }
+        .mode-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15) !important;
+            color: #fff !important;
         }
         .ctrl-block {
             display: none;
@@ -867,43 +753,56 @@
         <div id="damage-overlay-2"></div>
         <div id="instructions">
             <h1>CyberStrike FPS</h1>
-            <h3>Select Mode</h3>
-            <div id="mode-select">
-                <button onclick="startGame('classic')">Classic &mdash; Wave Survival</button>
-                <button class="mode-btn-1v1" onclick="startGame('1v1')">1v1 Local &mdash; Split Screen</button>
+            <div id="main-menu">
+                <h3>Select Mode</h3>
+                <div id="mode-select">
+                    <button onclick="startGame('classic')">Classic &mdash; Wave Survival</button>
+                    <button class="mode-btn-1v1" onclick="showOnlineLobby()">1v1 Online &mdash; Networked PvP</button>
+                </div>
+                <div id="ctrl-classic" class="ctrl-block active">
+                    <h4>Classic Controls</h4>
+                    <div class="ctrl-row"><span>WASD / Arrows</span><span>Move</span></div>
+                    <div class="ctrl-row"><span>Mouse</span><span>Aim</span></div>
+                    <div class="ctrl-row"><span>Click</span><span>Shoot</span></div>
+                    <div class="ctrl-row"><span>Space</span><span>Jump</span></div>
+                    <div class="ctrl-row"><span>Shift</span><span>Dash</span></div>
+                    <div class="ctrl-row"><span>R</span><span>Reload</span></div>
+                    <div class="ctrl-row"><span>Tab</span><span>Toggle Third-Person</span></div>
+                    <div class="ctrl-row"><span>Esc</span><span>Pause</span></div>
+                </div>
+                <div id="ctrl-1v1" class="ctrl-block p2-block">
+                    <h4>1v1 Online &mdash; Same controls as Classic</h4>
+                    <div class="ctrl-row"><span>Goal</span><span>Last human standing</span></div>
+                    <div class="ctrl-row"><span>Bots</span><span>Auto-balance 50/50 between players</span></div>
+                    <div class="ctrl-row"><span>Friendly Fire</span><span>ON</span></div>
+                    <div class="ctrl-row"><span>Both Die</span><span>Bots Win</span></div>
+                </div>
             </div>
-            <div id="ctrl-classic" class="ctrl-block active">
-                <h4>Controls</h4>
-                <div class="ctrl-row"><span>WASD / Arrows</span><span>Move</span></div>
-                <div class="ctrl-row"><span>Mouse</span><span>Aim</span></div>
-                <div class="ctrl-row"><span>Click</span><span>Shoot</span></div>
-                <div class="ctrl-row"><span>Space</span><span>Jump</span></div>
-                <div class="ctrl-row"><span>Shift</span><span>Dash</span></div>
-                <div class="ctrl-row"><span>R</span><span>Reload</span></div>
-                <div class="ctrl-row"><span>Tab</span><span>Toggle Third-Person</span></div>
-                <div class="ctrl-row"><span>Esc</span><span>Pause</span></div>
+            <div id="online-lobby" style="display: none;">
+                <h3 id="lobby-title">Online 1v1</h3>
+                <div id="lobby-choose" style="display: flex; flex-direction: column; gap: 12px; margin: 18px 0;">
+                    <button onclick="hostMatch()">Host a Match</button>
+                    <button class="mode-btn-1v1" onclick="showJoinForm()">Join a Match</button>
+                    <button class="mode-btn-secondary" onclick="backToMainMenu()">Back</button>
+                </div>
+                <div id="lobby-host" style="display: none;">
+                    <p style="color: rgba(255,255,255,0.85); margin: 14px 0 6px;">Share this code with the other player:</p>
+                    <div id="host-code" style="font-size: clamp(18px, 3vh, 28px); color: #00ffd5; text-shadow: 0 0 12px rgba(0,255,213,0.8); letter-spacing: 4px; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid #00ffd5; border-radius: 4px; margin: 8px 0; word-break: break-all;">Connecting...</div>
+                    <button onclick="copyHostCode()" style="margin-top: 6px; padding: 6px 14px; font-size: 12px;">Copy Code</button>
+                    <p id="host-status" style="color: #ffaa00; margin-top: 14px;">Waiting for opponent to join...</p>
+                    <button class="mode-btn-secondary" onclick="cancelLobby()">Cancel</button>
+                </div>
+                <div id="lobby-join" style="display: none;">
+                    <p style="color: rgba(255,255,255,0.85); margin: 14px 0 6px;">Enter the host's code:</p>
+                    <input id="join-code-input" type="text" placeholder="paste code..." autocomplete="off" style="width: 80%; padding: 10px; font-family: inherit; font-size: clamp(14px, 2vh, 18px); background: rgba(0,0,0,0.5); color: #00ffd5; border: 1px solid #00ffd5; border-radius: 4px; text-align: center; letter-spacing: 2px;" />
+                    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 14px;">
+                        <button onclick="joinMatch()">Connect</button>
+                        <button class="mode-btn-secondary" onclick="cancelLobby()">Cancel</button>
+                    </div>
+                    <p id="join-status" style="color: #ffaa00; margin-top: 14px;"></p>
+                </div>
             </div>
-            <div id="ctrl-1v1" class="ctrl-block">
-                <h4>Player 1 &mdash; Cyan</h4>
-                <div class="ctrl-row"><span>WASD</span><span>Move</span></div>
-                <div class="ctrl-row"><span>Mouse</span><span>Aim</span></div>
-                <div class="ctrl-row"><span>Click</span><span>Shoot</span></div>
-                <div class="ctrl-row"><span>Space</span><span>Jump</span></div>
-                <div class="ctrl-row"><span>L-Shift</span><span>Dash</span></div>
-                <div class="ctrl-row"><span>R</span><span>Reload</span></div>
-                <div class="ctrl-row"><span>Tab</span><span>3rd Person</span></div>
-            </div>
-            <div id="ctrl-1v1-p2" class="ctrl-block p2-block">
-                <h4>Player 2 &mdash; Magenta</h4>
-                <div class="ctrl-row"><span>IJKL</span><span>Move</span></div>
-                <div class="ctrl-row"><span>Arrows</span><span>Aim</span></div>
-                <div class="ctrl-row"><span>Enter</span><span>Shoot</span></div>
-                <div class="ctrl-row"><span>R-Shift</span><span>Jump</span></div>
-                <div class="ctrl-row"><span>R-Ctrl</span><span>Dash</span></div>
-                <div class="ctrl-row"><span>P</span><span>Reload</span></div>
-                <div class="ctrl-row"><span>Backtick `</span><span>3rd Person</span></div>
-            </div>
-            <p style="color: #ffaa00; margin-top: 14px; font-size: clamp(10px, 1.2vh, 12px);">In 1v1, friendly fire is ON and bots auto-balance attacks 50/50 between players. Last human standing wins; if both die, bots win.</p>
+            <p style="color: #ffaa00; margin-top: 14px; font-size: clamp(10px, 1.2vh, 12px);">In 1v1 Online, friendly fire is ON and bots auto-balance attacks 50/50 between players. Last human standing wins; if both die, bots win.</p>
         </div>
         <div id="pause-menu">
             <h2>Game Paused</h2>
@@ -912,6 +811,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <script>
         let scene, camera, renderer;
         let enemies = [];
@@ -988,13 +888,15 @@
         const bulletPool = [];
 
         function getBullet() {
+            let b;
             if (bulletPool.length > 0) {
-                const b = bulletPool.pop();
+                b = bulletPool.pop();
                 b.visible = true;
-                return b;
+            } else {
+                b = new THREE.Mesh(sharedBulletGeometry, sharedBulletMaterial);
+                scene.add(b);
             }
-            const b = new THREE.Mesh(sharedBulletGeometry, sharedBulletMaterial);
-            scene.add(b);
+            b.userData.netId = nextEntityId++;
             return b;
         }
 
@@ -1008,13 +910,15 @@
         const enemyBulletPool = [];
 
         function getEnemyBullet() {
+            let b;
             if (enemyBulletPool.length > 0) {
-                const b = enemyBulletPool.pop();
+                b = enemyBulletPool.pop();
                 b.visible = true;
-                return b;
+            } else {
+                b = new THREE.Mesh(sharedEnemyBulletGeometry, sharedEnemyBulletMaterial);
+                scene.add(b);
             }
-            const b = new THREE.Mesh(sharedEnemyBulletGeometry, sharedEnemyBulletMaterial);
-            scene.add(b);
+            b.userData.netId = nextEntityId++;
             return b;
         }
 
@@ -1123,19 +1027,454 @@
         let weaponRecoil = 0;
 
         // ===== 1v1 mode state =====
-        let gameMode = 'classic'; // 'classic' | '1v1'
+        let gameMode = 'classic'; // 'classic' | '1v1online'
         let is1v1 = false;
-        let player2 = null; // Constructed in startGame('1v1')
-        let camera2 = null; // P2 camera (split-screen)
+        let player2 = null; // Constructed at start of 1v1 (represents the magenta player)
+        let camera2 = null; // P2 camera
         let p1Alive = true;
         let p2Alive = true;
-        let isFiringP1 = false; // mirrors isMouseDown for P1 (kept distinct for clarity)
-        // Keyboard-aim turn rates for P2 (radians/sec)
-        const KB_AIM_YAW_RATE = 2.5;
-        const KB_AIM_PITCH_RATE = 2.0;
         // PvP balance counters
         let p1TargetedByCount = 0;
         let p2TargetedByCount = 0;
+
+        // ===== Online netcode state =====
+        let isOnline1v1 = false;          // True when in networked 1v1 mode
+        let iAmHost = false;              // Host runs authoritative simulation; joiner is a thin client
+        let peer = null;                  // PeerJS Peer instance
+        let conn = null;                  // PeerJS DataConnection
+        let lastNetInput = null;          // Most recent input received by host from joiner
+        let lastSnapshotSendTime = 0;     // Host: when did we last send a snapshot
+        let lastInputSendTime = 0;        // Joiner: when did we last send our input
+        const SNAPSHOT_RATE_HZ = 30;      // Host → joiner snapshots
+        const INPUT_RATE_HZ = 60;         // Joiner → host inputs
+        let nextEntityId = 1;             // Monotonic ID for bots and bullets (host-side)
+        // Joiner-side caches of remote-authoritative state, keyed by entity id
+        let netEnemyState = new Map();    // id → { mesh, type, hp, maxHp, armed }
+        let netBulletState = new Map();   // id → { mesh, isPlayer }
+        let netMedkitState = new Map();   // id → { mesh }
+        let netPowerupState = new Map();  // id → { mesh, type }
+        // Joiner: target position from snapshot to lerp toward
+        let netRemoteTargets = { p1: null, p2: null };
+
+        function localPlayerIdx() {
+            if (!is1v1) return 0;
+            if (!isOnline1v1) return 0; // (legacy local mode would be 0; we no longer ship local 1v1)
+            return iAmHost ? 0 : 1;
+        }
+
+        function remotePlayerIdx() {
+            return 1 - localPlayerIdx();
+        }
+
+        function netSendInput(extra) {
+            if (!conn || !conn.open) return;
+            try {
+                const msg = Object.assign({
+                    t: 'input',
+                    yaw: player2 ? player2.yaw : 0,
+                    pitch: player2 ? player2.pitch : 0,
+                    fwd: !!(keys['w'] || keys['arrowup']),
+                    back: !!(keys['s'] || keys['arrowdown']),
+                    left: !!(keys['a'] || keys['arrowleft']),
+                    right: !!(keys['d'] || keys['arrowright']),
+                    jump: !!keys[' '],
+                    dash: !!keys['shift'],
+                    isFiring: !!isMouseDown
+                }, extra || {});
+                conn.send(msg);
+            } catch (e) { /* ignore network send errors */ }
+        }
+
+        function netSendEvent(payload) {
+            if (!conn || !conn.open) return;
+            try { conn.send(Object.assign({ t: 'event' }, payload)); } catch (e) {}
+        }
+
+        // ===== Lobby UI =====
+        function showOnlineLobby() {
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('online-lobby').style.display = 'block';
+            document.getElementById('lobby-choose').style.display = 'flex';
+            document.getElementById('lobby-host').style.display = 'none';
+            document.getElementById('lobby-join').style.display = 'none';
+        }
+        function backToMainMenu() {
+            cancelLobby();
+            document.getElementById('online-lobby').style.display = 'none';
+            document.getElementById('main-menu').style.display = 'block';
+        }
+        function showJoinForm() {
+            document.getElementById('lobby-choose').style.display = 'none';
+            document.getElementById('lobby-join').style.display = 'block';
+            document.getElementById('join-status').textContent = '';
+            setTimeout(() => { const i = document.getElementById('join-code-input'); if (i) i.focus(); }, 50);
+        }
+        function copyHostCode() {
+            const code = document.getElementById('host-code').textContent;
+            if (navigator.clipboard) navigator.clipboard.writeText(code).catch(() => {});
+        }
+        function cancelLobby() {
+            try { if (conn) { conn.close(); conn = null; } } catch (e) {}
+            try { if (peer) { peer.destroy(); peer = null; } } catch (e) {}
+            document.getElementById('lobby-host').style.display = 'none';
+            document.getElementById('lobby-join').style.display = 'none';
+            document.getElementById('lobby-choose').style.display = 'flex';
+        }
+
+        function getPeerCtor() {
+            // Allow tests to inject a mock via window.__MockPeer
+            return (typeof window !== 'undefined' && window.__MockPeer) ? window.__MockPeer : (typeof Peer === 'undefined' ? null : Peer);
+        }
+
+        function hostMatch() {
+            const PeerCtor = getPeerCtor();
+            if (!PeerCtor) {
+                document.getElementById('host-status').textContent = 'PeerJS library failed to load. Check your network.';
+                return;
+            }
+            document.getElementById('lobby-choose').style.display = 'none';
+            document.getElementById('lobby-host').style.display = 'block';
+            document.getElementById('host-status').textContent = 'Connecting to broker...';
+            document.getElementById('host-code').textContent = 'Connecting...';
+
+            try { if (peer) peer.destroy(); } catch (e) {}
+            peer = new PeerCtor();
+            peer.on('open', (id) => {
+                document.getElementById('host-code').textContent = id;
+                document.getElementById('host-status').textContent = 'Waiting for opponent to join...';
+            });
+            peer.on('connection', (incoming) => {
+                conn = incoming;
+                iAmHost = true;
+                conn.on('open', () => {
+                    document.getElementById('host-status').textContent = 'Connected! Starting match...';
+                    setupNetMessageHandlers();
+                    // Tell joiner to start the match too
+                    try { conn.send({ t: 'start' }); } catch (e) {}
+                    setTimeout(() => startGame('1v1online'), 200);
+                });
+                conn.on('close', () => onNetDisconnect());
+                conn.on('error', () => onNetDisconnect());
+            });
+            peer.on('error', (err) => {
+                document.getElementById('host-status').textContent = 'Error: ' + (err && err.message ? err.message : err);
+            });
+        }
+
+        function joinMatch() {
+            const PeerCtor = getPeerCtor();
+            if (!PeerCtor) {
+                document.getElementById('join-status').textContent = 'PeerJS library failed to load.';
+                return;
+            }
+            const code = document.getElementById('join-code-input').value.trim();
+            if (!code) {
+                document.getElementById('join-status').textContent = 'Please enter a code.';
+                return;
+            }
+            document.getElementById('join-status').textContent = 'Connecting to broker...';
+
+            try { if (peer) peer.destroy(); } catch (e) {}
+            peer = new PeerCtor();
+            peer.on('open', () => {
+                document.getElementById('join-status').textContent = 'Connecting to host...';
+                conn = peer.connect(code, { reliable: false });
+                conn.on('open', () => {
+                    iAmHost = false;
+                    document.getElementById('join-status').textContent = 'Connected! Waiting for host to start...';
+                    setupNetMessageHandlers();
+                });
+                conn.on('close', () => onNetDisconnect());
+                conn.on('error', () => onNetDisconnect());
+            });
+            peer.on('error', (err) => {
+                document.getElementById('join-status').textContent = 'Error: ' + (err && err.message ? err.message : err);
+            });
+        }
+
+        function setupNetMessageHandlers() {
+            if (!conn) return;
+            conn.on('data', (msg) => {
+                if (!msg || typeof msg !== 'object') return;
+                if (msg.t === 'start' && !iAmHost) {
+                    setTimeout(() => startGame('1v1online'), 200);
+                    return;
+                }
+                if (msg.t === 'input' && iAmHost) {
+                    lastNetInput = msg;
+                    // Discrete events: shoot, reload — handled once on receive
+                    if (msg.shoot && player2) {
+                        player2.isFiring = true;
+                        shoot(1);
+                    }
+                    if (msg.shootRelease && player2) {
+                        player2.isFiring = false;
+                    }
+                    if (msg.reloadReq) {
+                        reload(1);
+                    }
+                    return;
+                }
+                if (msg.t === 'snapshot' && !iAmHost) {
+                    applySnapshot(msg);
+                    return;
+                }
+                if (msg.t === 'event' && !iAmHost) {
+                    handleNetEvent(msg);
+                    return;
+                }
+            });
+        }
+
+        function onNetDisconnect() {
+            if (gameStarted && isOnline1v1) {
+                gameStarted = false;
+                gamePaused = true;
+                if (document.exitPointerLock) document.exitPointerLock();
+                const pm = document.getElementById('pause-menu');
+                pm.innerHTML = `
+                    <h2 style="color: #ff3333;">CONNECTION LOST</h2>
+                    <p>Opponent disconnected.</p>
+                    <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: rgba(255, 50, 50, 0.2); color: #ff3333; border: 1px solid #ff3333; cursor: pointer; text-transform: uppercase; font-family: inherit;">Return to Menu</button>
+                `;
+                pm.style.display = 'block';
+            }
+        }
+
+        function handleNetEvent(msg) {
+            // Reserved for future event types. Currently the snapshot carries all state.
+        }
+
+        function showJoinerEndScreen(snap) {
+            if (!gameStarted) return;
+            gameStarted = false;
+            gamePaused = true;
+            if (document.exitPointerLock) document.exitPointerLock();
+            const p1a = snap.p1 && snap.p1.alive;
+            const p2a = snap.p2 && snap.p2.alive;
+            let headline;
+            if (!p1a && !p2a) {
+                headline = '<h2 style="color:#ff4d4d; text-shadow:0 0 18px rgba(255,80,80,0.9);">BOTS WIN</h2><p>Both operatives eliminated.</p>';
+            } else if (p1a && !p2a) {
+                headline = '<h2 style="color:#00ffd5; text-shadow:0 0 18px rgba(0,255,213,0.9);">PLAYER 1 VICTORY</h2>';
+            } else {
+                headline = '<h2 style="color:#ff8ee0; text-shadow:0 0 18px rgba(255,142,224,0.9);">PLAYER 2 VICTORY</h2>';
+            }
+            const p1Stats = snap.p1 ? `P1 &mdash; ${snap.p1.kills} kills / ${snap.p1.score} score` : '';
+            const p2Stats = snap.p2 ? `P2 &mdash; ${snap.p2.kills} kills / ${snap.p2.score} score` : '';
+            const pm = document.getElementById('pause-menu');
+            pm.innerHTML = `
+                ${headline}
+                <p style="margin-top:14px;">${p1Stats}</p>
+                <p>${p2Stats}</p>
+                <p style="margin-top:6px;">Wave Reached: <span style="color:#00ffd5">${snap.wave}</span></p>
+                <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: rgba(0, 255, 213, 0.12); color: #00ffd5; border: 1px solid #00ffd5; cursor: pointer; text-transform: uppercase; font-family: inherit;">Reboot System</button>
+            `;
+            pm.style.display = 'block';
+        }
+
+        // ===== Snapshot (host → joiner) =====
+        function buildSnapshot() {
+            const snap = { t: 'snapshot', ts: Date.now() };
+            // Players
+            snap.p1 = {
+                x: yawObject.position.x, y: yawObject.position.y, z: yawObject.position.z,
+                yaw: yaw, pitch: pitch,
+                hp: health, maxHp: maxHealth, ammo: ammo, kills: kills, score: score,
+                comboMult: comboMultiplier, comboLeft: comboTimeLeft,
+                shield: shieldActive, shieldLeft: shieldTimeLeft,
+                overdrive: overdriveActive, overdriveLeft: overdriveTimeLeft,
+                isReloading: isReloading, isDashing: isDashing, dashCooldown: dashCooldown,
+                alive: p1Alive
+            };
+            snap.p2 = player2 ? {
+                x: player2.yawObject.position.x, y: player2.yawObject.position.y, z: player2.yawObject.position.z,
+                yaw: player2.yaw, pitch: player2.pitch,
+                hp: player2.health, maxHp: maxHealth, ammo: player2.ammo, kills: player2.kills, score: player2.score,
+                comboMult: player2.comboMultiplier, comboLeft: player2.comboTimeLeft,
+                shield: player2.shieldActive, shieldLeft: player2.shieldTimeLeft,
+                overdrive: player2.overdriveActive, overdriveLeft: player2.overdriveTimeLeft,
+                isReloading: player2.isReloading, isDashing: player2.isDashing, dashCooldown: player2.dashCooldown,
+                alive: p2Alive
+            } : null;
+            // Bots
+            snap.bots = enemies.map(e => ({
+                id: e.userData.netId,
+                x: e.position.x, y: e.position.y, z: e.position.z,
+                ry: e.rotation.y,
+                hp: e.userData.health, maxHp: e.userData.maxHealth,
+                type: e.userData.type,
+                armed: !!e.userData.isArmed
+            }));
+            // Bullets (player & enemy combined with isPlayer flag)
+            snap.bullets = [];
+            for (const b of bullets) snap.bullets.push({ id: b.userData.netId, x: b.position.x, y: b.position.y, z: b.position.z, p: 1 });
+            for (const b of enemyBullets) snap.bullets.push({ id: b.userData.netId, x: b.position.x, y: b.position.y, z: b.position.z, p: 0 });
+            snap.wave = wave;
+            // Compact medkits / powerups
+            snap.medkits = medkits.map(m => ({ id: m.userData.netId, x: m.position.x, y: m.position.y, z: m.position.z }));
+            snap.powerups = powerups.map(p => ({ id: p.userData.netId, x: p.position.x, y: p.position.y, z: p.position.z, ty: p.userData.type }));
+            return snap;
+        }
+
+        function applySnapshot(snap) {
+            // Apply to remote player (player1 = host = remote from joiner's POV)
+            if (snap.p1 && yawObject) {
+                netRemoteTargets.p1 = snap.p1;
+                yawObject.position.set(snap.p1.x, snap.p1.y, snap.p1.z);
+                yawObject.rotation.y = snap.p1.yaw;
+                if (pitchObject) pitchObject.rotation.x = snap.p1.pitch;
+                const wasAlive = p1Alive;
+                p1Alive = snap.p1.alive;
+                health = snap.p1.hp;
+                ammo = snap.p1.ammo;
+                kills = snap.p1.kills;
+                score = snap.p1.score;
+                if (playerModel) {
+                    playerModel.position.set(snap.p1.x, snap.p1.y - 1.6, snap.p1.z);
+                    playerModel.rotation.y = snap.p1.yaw;
+                    playerModel.visible = wasAlive && p1Alive;
+                }
+                if (!p1Alive && weapon) weapon.visible = false;
+            }
+            // Apply to local player2 (joiner's own state) — mirror of authoritative host values
+            if (snap.p2 && player2) {
+                const prevHp = player2.health;
+                player2.health = snap.p2.hp;
+                player2.ammo = snap.p2.ammo;
+                player2.kills = snap.p2.kills;
+                player2.score = snap.p2.score;
+                player2.comboMultiplier = snap.p2.comboMult;
+                player2.comboTimeLeft = snap.p2.comboLeft;
+                player2.shieldActive = snap.p2.shield;
+                player2.shieldTimeLeft = snap.p2.shieldLeft;
+                player2.overdriveActive = snap.p2.overdrive;
+                player2.overdriveTimeLeft = snap.p2.overdriveLeft;
+                player2.isReloading = snap.p2.isReloading;
+                player2.dashCooldown = snap.p2.dashCooldown;
+                const wasP2Alive = p2Alive;
+                p2Alive = snap.p2.alive;
+                // Position: authoritative (host has the final say)
+                player2.yawObject.position.set(snap.p2.x, snap.p2.y, snap.p2.z);
+                if (player2.playerModel) {
+                    player2.playerModel.position.set(snap.p2.x, snap.p2.y - 1.6, snap.p2.z);
+                    player2.playerModel.rotation.y = player2.yaw;
+                }
+                if (!p2Alive && player2.weapon) player2.weapon.visible = false;
+                // Flash damage overlay locally if my HP just dropped
+                if (snap.p2.hp < prevHp && !iAmHost) {
+                    showDamageOverlayFor(localPlayerIdx());
+                }
+                // Update shield / overdrive DOM on joiner's local HUD
+                if (!iAmHost) {
+                    const shieldEl = document.getElementById('shield-indicator');
+                    if (shieldEl) shieldEl.style.display = snap.p2.shield ? 'block' : 'none';
+                    const odEl = document.getElementById('overdrive-indicator');
+                    if (odEl) odEl.style.display = snap.p2.overdrive ? 'block' : 'none';
+                }
+                // Detect death-to-win-screen transition on the joiner
+                if (wasP2Alive && !p2Alive && !iAmHost) {
+                    showJoinerEndScreen(snap);
+                }
+            }
+            // Detect host death on joiner side
+            if (snap.p1 && !iAmHost) {
+                if (!snap.p1.alive && (!snap.p2 || !snap.p2.alive)) {
+                    if (gameStarted) showJoinerEndScreen(snap);
+                } else if (!snap.p1.alive && snap.p2 && snap.p2.alive) {
+                    if (gameStarted) showJoinerEndScreen(snap);
+                }
+            }
+            wave = snap.wave;
+            updateHUDFor(0);
+            updateHUDFor(1);
+            // Bots: reconcile (remove missing, add new, update existing)
+            const seenBots = new Set();
+            for (const bs of snap.bots) {
+                seenBots.add(bs.id);
+                let entry = netEnemyState.get(bs.id);
+                if (!entry) {
+                    // Spawn placeholder mesh on joiner side
+                    const geom = bs.type === 'speedster' ? sharedSpeedsterGeometry : (bs.type === 'brute' ? sharedBruteGeometry : sharedEnemyGeometry);
+                    const matProto = bs.type === 'speedster' ? speedsterMaterialProto : (bs.type === 'brute' ? bruteMaterialProto : enemyMaterialProto);
+                    const mat = matProto.clone();
+                    const m = new THREE.Mesh(geom, mat);
+                    scene.add(m);
+                    entry = { mesh: m };
+                    netEnemyState.set(bs.id, entry);
+                }
+                entry.mesh.position.set(bs.x, bs.y, bs.z);
+                entry.mesh.rotation.y = bs.ry;
+            }
+            for (const [id, entry] of netEnemyState) {
+                if (!seenBots.has(id)) {
+                    scene.remove(entry.mesh);
+                    netEnemyState.delete(id);
+                }
+            }
+            // Bullets
+            const seenBullets = new Set();
+            for (const bs of snap.bullets) {
+                seenBullets.add(bs.id);
+                let entry = netBulletState.get(bs.id);
+                if (!entry) {
+                    const geom = sharedBulletGeometry;
+                    const mat = bs.p ? sharedBulletMaterial : sharedEnemyBulletMaterial;
+                    const m = new THREE.Mesh(geom, mat);
+                    scene.add(m);
+                    entry = { mesh: m };
+                    netBulletState.set(bs.id, entry);
+                }
+                entry.mesh.position.set(bs.x, bs.y, bs.z);
+            }
+            for (const [id, entry] of netBulletState) {
+                if (!seenBullets.has(id)) {
+                    scene.remove(entry.mesh);
+                    netBulletState.delete(id);
+                }
+            }
+            // Medkits
+            const seenMedkits = new Set();
+            for (const ms of (snap.medkits || [])) {
+                seenMedkits.add(ms.id);
+                let entry = netMedkitState.get(ms.id);
+                if (!entry) {
+                    const m = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.7, 0.3, 0.7),
+                        new THREE.MeshStandardMaterial({ color: 0x00ffcc, emissive: 0x00ffcc, emissiveIntensity: 0.6, metalness: 0.3, roughness: 0.2 })
+                    );
+                    scene.add(m);
+                    entry = { mesh: m };
+                    netMedkitState.set(ms.id, entry);
+                }
+                entry.mesh.position.set(ms.x, ms.y, ms.z);
+                entry.mesh.rotation.y += 0.04;
+            }
+            for (const [id, entry] of netMedkitState) {
+                if (!seenMedkits.has(id)) { scene.remove(entry.mesh); netMedkitState.delete(id); }
+            }
+            // Powerups
+            const seenPowerups = new Set();
+            for (const ps of (snap.powerups || [])) {
+                seenPowerups.add(ps.id);
+                let entry = netPowerupState.get(ps.id);
+                if (!entry) {
+                    const color = ps.ty === 'shield' ? 0x00aaff : 0xff00ff;
+                    const m = new THREE.Mesh(
+                        new THREE.OctahedronGeometry(0.4),
+                        new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 0.8, metalness: 0.5, roughness: 0.1 })
+                    );
+                    scene.add(m);
+                    entry = { mesh: m, type: ps.ty };
+                    netPowerupState.set(ps.id, entry);
+                }
+                entry.mesh.position.set(ps.x, ps.y, ps.z);
+                entry.mesh.rotation.y += 0.05;
+            }
+            for (const [id, entry] of netPowerupState) {
+                if (!seenPowerups.has(id)) { scene.remove(entry.mesh); netPowerupState.delete(id); }
+            }
+        }
 
         function getPlayerYawObject(idx) {
             return idx === 0 ? yawObject : (player2 ? player2.yawObject : yawObject);
@@ -2147,6 +2486,7 @@
                 }
             }
 
+            enemy.userData.netId = nextEntityId++;
             enemies.push(enemy);
             scene.add(enemy);
 
@@ -2533,40 +2873,41 @@
             tempVec1.copy(myYaw.position); // prevPosition
 
             // ===== Movement input =====
+            // Movement for the LOCAL player comes from this client's keyboard. For the REMOTE
+            // player in online 1v1, movement comes from network input applied via netInput.
             myDirection.set(0, 0, 0);
-            if (isP2) {
-                if (keys['i']) myDirection.z -= 1;
-                if (keys['k']) myDirection.z += 1;
-                if (keys['j']) myDirection.x -= 1;
-                if (keys['l']) myDirection.x += 1;
+            const isLocalUser = (playerIdx === localPlayerIdx());
+            const useNetInput = isOnline1v1 && !isLocalUser; // host: remote=joiner; joiner: doesn't update remote at all in animate
+
+            if (useNetInput) {
+                // Host reads buffered input from joiner for player2
+                const inp = lastNetInput;
+                if (inp) {
+                    if (inp.fwd) myDirection.z -= 1;
+                    if (inp.back) myDirection.z += 1;
+                    if (inp.left) myDirection.x -= 1;
+                    if (inp.right) myDirection.x += 1;
+                    // Apply joiner's yaw/pitch authoritatively
+                    if (typeof inp.yaw === 'number' && typeof inp.pitch === 'number') {
+                        if (isP2 && p) {
+                            p.yaw = inp.yaw;
+                            p.pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, inp.pitch));
+                            myYaw.rotation.y = p.yaw;
+                            myPitchObj.rotation.x = p.pitch;
+                        }
+                    }
+                }
             } else {
                 if (keys['w']) myDirection.z -= 1;
                 if (keys['s']) myDirection.z += 1;
                 if (keys['a']) myDirection.x -= 1;
                 if (keys['d']) myDirection.x += 1;
-                // In classic, arrow keys also move P1; in 1v1 they aim P2.
-                if (!is1v1) {
-                    if (keys['arrowup']) myDirection.z -= 1;
-                    if (keys['arrowdown']) myDirection.z += 1;
-                    if (keys['arrowleft']) myDirection.x -= 1;
-                    if (keys['arrowright']) myDirection.x += 1;
-                }
+                if (keys['arrowup']) myDirection.z -= 1;
+                if (keys['arrowdown']) myDirection.z += 1;
+                if (keys['arrowleft']) myDirection.x -= 1;
+                if (keys['arrowright']) myDirection.x += 1;
             }
             myDirection.normalize();
-
-            // ===== Keyboard aim for P2 =====
-            if (isP2) {
-                let dYaw = 0, dPitch = 0;
-                if (keys['arrowleft'])  dYaw   += KB_AIM_YAW_RATE * delta;
-                if (keys['arrowright']) dYaw   -= KB_AIM_YAW_RATE * delta;
-                if (keys['arrowup'])    dPitch += KB_AIM_PITCH_RATE * delta;
-                if (keys['arrowdown'])  dPitch -= KB_AIM_PITCH_RATE * delta;
-                p.yaw += dYaw;
-                p.pitch += dPitch;
-                p.pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, p.pitch));
-                myYaw.rotation.y = p.yaw;
-                myPitchObj.rotation.x = p.pitch;
-            }
 
             // ===== Dash =====
             const myDashCooldownVal = isP2 ? p.dashCooldown : dashCooldown;
@@ -2579,7 +2920,12 @@
             if (newDashCooldown > 0) newDashCooldown -= delta;
             if (newDashCooldown < 0) newDashCooldown = 0;
 
-            const dashKeyPressed = isP2 ? !!keys['__rctrl'] : (is1v1 ? !!keys['__lshift'] : !!keys['shift']);
+            let dashKeyPressed;
+            if (useNetInput) {
+                dashKeyPressed = !!(lastNetInput && lastNetInput.dash);
+            } else {
+                dashKeyPressed = !!keys['shift'];
+            }
             if (dashKeyPressed && newDashCooldown === 0 && myDirection.length() > 0 && !newDashing) {
                 newDashing = true;
                 newDashTime = DASH_DURATION;
@@ -2622,7 +2968,9 @@
             }
 
             // ===== Jump =====
-            const jumpKey = isP2 ? keys['__rshift'] : keys[' '];
+            let jumpKey;
+            if (useNetInput) jumpKey = !!(lastNetInput && lastNetInput.jump);
+            else jumpKey = !!keys[' '];
             const myCanJump = isP2 ? p.canJump : canJump;
             if (jumpKey && myCanJump) {
                 myVelocity.y = jumpSpeed;
@@ -3134,7 +3482,9 @@
         function updateHUDFor(playerIdx) {
             const isP2 = (playerIdx === 1);
             if (isP2 && !player2) return;
-            const suffix = isP2 ? '-2' : '';
+            // Route to local HUD ("" suffix) for the local player; opponent HUD ("-2") for remote.
+            // In classic, idx=0 is always local → "". In online 1v1, joiner's local is idx=1.
+            const suffix = (playerIdx === localPlayerIdx()) ? '' : '-2';
             const p = isP2 ? player2 : null;
 
             const myHealth = isP2 ? p.health : health;
@@ -3232,13 +3582,17 @@
 
         function updateShooting() {
             if (!gameStarted || gamePaused) return;
-            // P1 auto-fire on mouse held
-            if (p1Alive && isMouseDown && rapidFireEnabled) {
-                shoot(0);
+            // Host only: P1 mouse-held auto-fire (P1 is host's local player)
+            if (!isOnline1v1 || iAmHost) {
+                if (p1Alive && isMouseDown && rapidFireEnabled) {
+                    shoot(0);
+                }
             }
-            // P2 auto-fire on Enter held
-            if (is1v1 && p2Alive && player2 && player2.isFiring && player2.rapidFireEnabled) {
-                shoot(1);
+            // Host: P2 rapid-fire driven by joiner's input.isFiring
+            if (isOnline1v1 && iAmHost && p2Alive && player2 && player2.rapidFireEnabled) {
+                if (lastNetInput && lastNetInput.isFiring) {
+                    shoot(1);
+                }
             }
         }
 
@@ -3397,6 +3751,7 @@
             powerup.userData.baseY = powerup.position.y;
             powerup.userData.floatOffset = Math.random() * Math.PI * 2;
             powerup.userData.rotationSpeed = 2 + Math.random();
+            powerup.userData.netId = nextEntityId++;
 
             powerups.push(powerup);
             scene.add(powerup);
@@ -3445,6 +3800,7 @@
             medkit.userData.baseY = medkit.position.y;
             medkit.userData.floatOffset = Math.random() * Math.PI * 2;
             medkit.userData.rotationSpeed = 1 + Math.random() * 0.5;
+            medkit.userData.netId = nextEntityId++;
 
             medkits.push(medkit);
             scene.add(medkit);
@@ -3667,18 +4023,44 @@
             const delta = clock.getDelta();
             const elapsed = clock.elapsedTime;
 
-            // Update each active player
-            for (const idx of getActivePlayerIndices()) {
-                updatePlayerFor(idx, delta);
+            if (isOnline1v1 && !iAmHost) {
+                // ===== Joiner-side update: minimal simulation, just local input + camera =====
+                // Local player movement is purely cosmetic on the joiner side; the host's
+                // snapshot will overwrite player2.yawObject.position each tick. We still
+                // update the camera based on yaw/pitch (already set by onMouseMove).
+                updateCameraPerspectiveFor(1, delta);
+                updateEnvironment(delta, elapsed);
+                // Send our inputs to host
+                const nowMs = performance.now();
+                if (nowMs - lastInputSendTime > 1000 / INPUT_RATE_HZ) {
+                    netSendInput();
+                    lastInputSendTime = nowMs;
+                }
+            } else {
+                // ===== Host (or classic single-player) =====
+                for (const idx of getActivePlayerIndices()) {
+                    updatePlayerFor(idx, delta);
+                }
+                updateEnemies(delta);
+                updateBullets(delta);
+                updateParticles(delta);
+                updateMedkits(delta);
+                handleHealthRegen(delta);
+                updateShooting();
+                updateEnvironment(delta, elapsed);
+                updateCameraPerspective(delta);
+
+                // Host: send periodic snapshot to joiner
+                if (isOnline1v1 && iAmHost) {
+                    const nowMs = performance.now();
+                    if (nowMs - lastSnapshotSendTime > 1000 / SNAPSHOT_RATE_HZ) {
+                        if (conn && conn.open) {
+                            try { conn.send(buildSnapshot()); } catch (e) {}
+                        }
+                        lastSnapshotSendTime = nowMs;
+                    }
+                }
             }
-            updateEnemies(delta);
-            updateBullets(delta);
-            updateParticles(delta);
-            updateMedkits(delta);
-            handleHealthRegen(delta);
-            updateShooting();
-            updateEnvironment(delta, elapsed);
-            updateCameraPerspective(delta);
 
             // Combo decrement per-player
             if (comboTimeLeft > 0) {
@@ -3705,27 +4087,17 @@
             }
 
             // ===== Render =====
-            if (!is1v1 || !camera2) {
-                renderer.setScissorTest(false);
-                renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
-                renderer.render(scene, camera);
+            // Single fullscreen viewport. In 1v1 online, each client renders only their own
+            // camera; the opponent player model is visible thanks to setPerPlayerVisibility.
+            renderer.setScissorTest(false);
+            renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
+            if (is1v1) {
+                const localIdx = localPlayerIdx();
+                setPerPlayerVisibility(localIdx);
+                const cam = (localIdx === 1 && camera2) ? camera2 : camera;
+                renderer.render(scene, cam);
             } else {
-                const w = window.innerWidth;
-                const h = window.innerHeight;
-                const halfW = Math.floor(w / 2);
-                renderer.setScissorTest(true);
-
-                renderer.setViewport(0, 0, halfW, h);
-                renderer.setScissor(0, 0, halfW, h);
-                setPerPlayerVisibility(0);
                 renderer.render(scene, camera);
-
-                renderer.setViewport(halfW, 0, w - halfW, h);
-                renderer.setScissor(halfW, 0, w - halfW, h);
-                setPerPlayerVisibility(1);
-                renderer.render(scene, camera2);
-
-                renderer.setScissorTest(false);
             }
         }
 
@@ -3733,50 +4105,20 @@
             const key = event.key.toLowerCase();
             keys[key] = true;
 
-            // Track left/right shift & ctrl distinctly (P1 left, P2 right in 1v1)
-            if (event.code === 'ShiftLeft')  keys['__lshift'] = true;
-            if (event.code === 'ShiftRight') keys['__rshift'] = true;
-            if (event.code === 'ControlLeft')  keys['__lctrl'] = true;
-            if (event.code === 'ControlRight') keys['__rctrl'] = true;
-
             if (event.key === 'Tab') {
                 event.preventDefault();
                 if (gameStarted) {
-                    togglePerspective(0);
+                    togglePerspective(localPlayerIdx());
                 }
                 return;
             }
 
-            // P2 perspective toggle: backtick
-            if (event.key === '`' && gameStarted && is1v1) {
-                event.preventDefault();
-                togglePerspective(1);
-                return;
-            }
-
-            // P1 reload (R) — but not when P2 is pressing R-something (R is only P1)
             if (key === 'r' && gameStarted) {
-                reload(0);
-            }
-
-            // P2 reload (P) in 1v1
-            if (key === 'p' && gameStarted && is1v1) {
-                reload(1);
-            }
-
-            // P2 shoot (Enter) in 1v1 — also set firing flag for rapid-fire
-            if ((event.key === 'Enter' || key === 'enter') && gameStarted && is1v1) {
-                event.preventDefault();
-                if (player2 && !player2.isFiring) {
-                    player2.isFiring = true;
-                    shoot(1);
+                if (isOnline1v1 && !iAmHost) {
+                    netSendInput({ reloadReq: true });
+                } else {
+                    reload(localPlayerIdx());
                 }
-            }
-
-            // Prevent arrow-key page scrolling in 1v1 (P2 uses arrows for aim)
-            if (is1v1 && (event.key === 'ArrowUp' || event.key === 'ArrowDown' ||
-                          event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
-                event.preventDefault();
             }
 
             if (event.key === 'Escape') {
@@ -3786,55 +4128,61 @@
         }
 
         function onKeyUp(event) {
-            const key = event.key.toLowerCase();
-            keys[key] = false;
-
-            if (event.code === 'ShiftLeft')  keys['__lshift'] = false;
-            if (event.code === 'ShiftRight') keys['__rshift'] = false;
-            if (event.code === 'ControlLeft')  keys['__lctrl'] = false;
-            if (event.code === 'ControlRight') keys['__rctrl'] = false;
-
-            if ((event.key === 'Enter' || key === 'enter') && is1v1 && player2) {
-                player2.isFiring = false;
-            }
+            keys[event.key.toLowerCase()] = false;
         }
 
         function onMouseMove(event) {
             if (!gameStarted || gamePaused) return;
-            if (!p1Alive) return;
+            const localIdx = localPlayerIdx();
+            if (!isPlayerAlive(localIdx)) return;
 
             const sensitivity = 0.002;
+            const dyaw = -event.movementX * sensitivity;
+            const dpitch = -event.movementY * sensitivity;
 
-            yaw -= event.movementX * sensitivity;
-            pitch -= event.movementY * sensitivity;
-            pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch));
-
-            yawObject.rotation.y = yaw;
-            pitchObject.rotation.x = pitch;
+            if (localIdx === 0) {
+                yaw += dyaw;
+                pitch += dpitch;
+                pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch));
+                yawObject.rotation.y = yaw;
+                pitchObject.rotation.x = pitch;
+            } else if (player2) {
+                player2.yaw += dyaw;
+                player2.pitch += dpitch;
+                player2.pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, player2.pitch));
+                player2.yawObject.rotation.y = player2.yaw;
+                player2.pitchObject.rotation.x = player2.pitch;
+            }
         }
 
         function onMouseDown(event) {
             if (!gameStarted || gamePaused) return;
             isMouseDown = true;
-            shoot(0);
+            const localIdx = localPlayerIdx();
+            if (isOnline1v1 && !iAmHost) {
+                // Joiner: send shoot request to host, who runs authoritative fire
+                netSendInput({ shoot: true });
+            } else {
+                shoot(localIdx);
+            }
         }
 
         function onMouseUp(event) {
             isMouseDown = false;
+            if (isOnline1v1 && !iAmHost) {
+                netSendInput({ shootRelease: true });
+            }
         }
 
         function onWindowResize() {
             const w = window.innerWidth;
             const h = window.innerHeight;
-            if (is1v1 && camera2) {
-                const halfAspect = (w / 2) / h;
-                camera.aspect = halfAspect;
-                camera.updateProjectionMatrix();
-                camera2.aspect = halfAspect;
+            const aspect = w / h;
+            camera.aspect = aspect;
+            camera.updateProjectionMatrix();
+            if (camera2) {
+                camera2.aspect = aspect;
                 camera2.updateProjectionMatrix();
-            } else {
-                camera.aspect = w / h;
-                camera.updateProjectionMatrix();
             }
             renderer.setSize(w, h);
         }
@@ -3842,7 +4190,8 @@
         function startGame(mode) {
             if (!mode) mode = 'classic';
             gameMode = mode;
-            is1v1 = (mode === '1v1');
+            isOnline1v1 = (mode === '1v1online');
+            is1v1 = isOnline1v1;
 
             document.body.classList.toggle('mode-1v1', is1v1);
             document.getElementById('instructions').style.display = 'none';
@@ -3938,7 +4287,24 @@
             document.addEventListener('mozpointerlockchange', onPointerLockChange);
             document.addEventListener('webkitpointerlockchange', onPointerLockChange);
 
-            startWave();
+            // Reset netcode timing
+            lastSnapshotSendTime = 0;
+            lastInputSendTime = 0;
+            netRemoteTargets = { p1: null, p2: null };
+            // Clear joiner-side caches from any prior session
+            for (const [id, entry] of netEnemyState) { scene.remove(entry.mesh); }
+            netEnemyState.clear();
+            for (const [id, entry] of netBulletState) { scene.remove(entry.mesh); }
+            netBulletState.clear();
+            for (const [id, entry] of netMedkitState) { scene.remove(entry.mesh); }
+            netMedkitState.clear();
+            for (const [id, entry] of netPowerupState) { scene.remove(entry.mesh); }
+            netPowerupState.clear();
+
+            // Only the host (or single-player classic) runs the wave system; joiner just listens.
+            if (!isOnline1v1 || iAmHost) {
+                startWave();
+            }
         }
         
         function onPointerLockChange() {
