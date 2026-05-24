@@ -453,6 +453,140 @@
             opacity: 0;
             transition: opacity 0.2s;
         }
+
+        /* ===== 1v1 online mode styles ===== */
+        /* In online 1v1, the opponent's compact HUD is shown on the right.
+           Single fullscreen viewport, single crosshair, single damage overlay. */
+
+        #hud-p2 {
+            position: absolute;
+            top: 80px;
+            right: 24px;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            padding: 12px 16px;
+            min-width: 220px;
+            background: linear-gradient(135deg, rgba(15, 5, 25, 0.88) 0%, rgba(8, 2, 18, 0.95) 100%);
+            border: 2px solid rgba(255, 80, 200, 0.5);
+            border-top: 4px solid #ff50c8;
+            border-radius: 8px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 0 20px rgba(255, 80, 200, 0.2), inset 0 0 12px rgba(255, 80, 200, 0.1);
+            z-index: 1000;
+        }
+        body.mode-1v1 #hud-p2 {
+            display: flex;
+        }
+        #hud-p2::before {
+            content: 'OPPONENT';
+            font-size: 11px;
+            color: #ff8ee0;
+            letter-spacing: 3px;
+            text-align: center;
+            margin-bottom: 4px;
+            text-shadow: 0 0 8px rgba(255, 142, 224, 0.8);
+        }
+        #hud-p2 .bar-shell { height: 12px; }
+        #hud-p2 .bar-header { font-size: 11px; }
+        #hud-p2 .status-row { font-size: 11px; padding: 4px 8px; }
+        #hud-p2 #status-grid { display: none; }
+        #hud-p2 .dash-bar-shell, #hud-p2 #combo-container-2 { display: none; }
+        #hud-p2 > div:last-child { display: none; }
+        #hud-p2 .bar-fill {
+            background: linear-gradient(90deg, #ff1f4d 0%, #ff523d 100%);
+        }
+        #hud-p2 .bar-fill.ammo {
+            background: linear-gradient(90deg, #ff77ee 0%, #aa55ff 100%);
+            box-shadow: 0 0 15px rgba(220, 100, 255, 0.8);
+        }
+        #hud-p2 .hud-card span:last-child,
+        #hud-p2 .status-value {
+            color: #ff8ee0;
+            text-shadow: 0 0 12px rgba(255, 142, 224, 0.8);
+        }
+        #hud-p2 .status-row {
+            background: rgba(45, 0, 30, 0.6);
+            border: 1px solid rgba(255, 100, 200, 0.3);
+            border-left: 2px solid rgba(255, 100, 200, 0.8);
+        }
+
+        /* top-hud-2, damage-overlay-2, hit-indicator-2, mode-indicator-2: legacy split-screen
+           elements; kept hidden in online 1v1 to avoid breaking JS lookups, but never displayed. */
+        #top-hud-2, #damage-overlay-2, #hit-indicator-2, #mode-indicator-2, #crosshair-2 { display: none !important; }
+
+        #mode-select {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 18px 0 14px;
+        }
+        #mode-select button {
+            margin-top: 0;
+        }
+        .mode-btn-1v1 {
+            background: rgba(255, 80, 200, 0.12) !important;
+            color: #ff8ee0 !important;
+            border-color: #ff50c8 !important;
+            box-shadow: 0 0 15px rgba(255, 80, 200, 0.3), inset 0 0 10px rgba(255, 80, 200, 0.2) !important;
+        }
+        .mode-btn-1v1:hover {
+            background: #ff50c8 !important;
+            color: #000 !important;
+            box-shadow: 0 0 30px rgba(255, 80, 200, 0.6) !important;
+        }
+        .mode-btn-secondary {
+            background: rgba(200, 200, 200, 0.08) !important;
+            color: rgba(255, 255, 255, 0.75) !important;
+            border-color: rgba(255, 255, 255, 0.3) !important;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.1), inset 0 0 6px rgba(255, 255, 255, 0.05) !important;
+        }
+        .mode-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15) !important;
+            color: #fff !important;
+        }
+        .ctrl-block {
+            display: none;
+            margin-top: 8px;
+            text-align: left;
+        }
+        .ctrl-block.active {
+            display: block;
+        }
+        .ctrl-block h4 {
+            color: #00ffd5;
+            text-transform: uppercase;
+            font-size: clamp(11px, 1.3vh, 13px);
+            margin: clamp(8px, 1.2vh, 14px) 0 clamp(4px, 0.6vh, 6px);
+            letter-spacing: 1.5px;
+        }
+        .ctrl-block.p2-block h4 {
+            color: #ff8ee0;
+        }
+        .ctrl-block .ctrl-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 10px;
+            margin: 3px 0;
+            font-size: clamp(10px, 1.2vh, 12px);
+            background: rgba(5, 16, 32, 0.7);
+            border-radius: 4px;
+            border-left: 2px solid rgba(0, 255, 213, 0.3);
+        }
+        .ctrl-block.p2-block .ctrl-row {
+            border-left-color: rgba(255, 100, 200, 0.4);
+        }
+        .ctrl-block .ctrl-row span:first-child {
+            color: #00ffd5;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .ctrl-block.p2-block .ctrl-row span:first-child {
+            color: #ff8ee0;
+        }
+        .ctrl-block .ctrl-row span:last-child {
+            color: rgba(255, 255, 255, 0.85);
+        }
     </style>
 </head>
 <body>
@@ -461,6 +595,11 @@
             <div class="crosshair-line horizontal"></div>
             <div class="crosshair-line vertical"></div>
         </div>
+        <div id="crosshair-2">
+            <div class="crosshair-line horizontal"></div>
+            <div class="crosshair-line vertical"></div>
+        </div>
+        <div id="viewport-divider"></div>
         <div id="top-hud">
             <div class="hud-card">
                 <span>Score</span>
@@ -473,6 +612,16 @@
             <div class="hud-card">
                 <span>Wave</span>
                 <span id="wave-value">1</span>
+            </div>
+        </div>
+        <div id="top-hud-2">
+            <div class="hud-card">
+                <span>Score</span>
+                <span id="score-value-2">0</span>
+            </div>
+            <div class="hud-card">
+                <span>Kills</span>
+                <span id="kills-2">0</span>
             </div>
         </div>
         <div id="hud">
@@ -537,24 +686,123 @@
                 <div id="overdrive-indicator" class="status-banner" style="display: none; color: #ff00ff; border-color: #ff00ff; background: rgba(255, 0, 255, 0.15); box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);">OVERDRIVE</div>
             </div>
         </div>
+        <div id="hud-p2">
+            <div class="bar-block">
+                <div class="bar-header">
+                    <span>Health</span>
+                    <span id="health-text-2">100</span>
+                </div>
+                <div class="bar-shell">
+                    <div class="bar-fill" id="health-bar-2" style="width: 100%;"></div>
+                </div>
+            </div>
+            <div class="bar-block">
+                <div class="bar-header">
+                    <span>Ammo</span>
+                    <span id="ammo-text-2">30</span>
+                </div>
+                <div class="bar-shell">
+                    <div class="bar-fill ammo" id="ammo-bar-2" style="width: 100%;"></div>
+                </div>
+            </div>
+            <div id="status-grid">
+                <div class="status-row">
+                    <span>Fire Rate</span>
+                    <span class="status-value" id="fire-rate-label-2">Level 1</span>
+                </div>
+                <div class="status-row">
+                    <span>Rapid Fire</span>
+                    <span class="status-value" id="rapid-fire-label-2">Offline</span>
+                </div>
+                <div class="status-row">
+                    <span>Shots / Second</span>
+                    <span class="status-value" id="fire-rate-stat-2">3.3</span>
+                </div>
+                <div class="status-row">
+                    <span>Reload</span>
+                    <span class="status-value" id="reload-indicator-2">Ready</span>
+                </div>
+            </div>
+            <div style="margin-top: 10px;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; color: #ff8ee0; text-transform:uppercase;">
+                    <span>Dash</span>
+                    <span id="dash-text-2">Ready</span>
+                </div>
+                <div class="dash-bar-shell" style="border-color: rgba(255, 100, 200, 0.3);">
+                    <div id="dash-bar-fill-2" style="width: 100%; background: linear-gradient(90deg, #ff77ee 0%, #aa55ff 100%); box-shadow: 0 0 8px rgba(220, 100, 255, 0.8); height: 100%; transition: width 0.1s linear;"></div>
+                </div>
+            </div>
+            <div id="combo-container-2" style="margin-top: 10px; text-align: center; opacity: 0; transition: opacity 0.2s;">
+                <div id="combo-text-2" style="color: #ffbb00; font-size: 20px; font-weight: bold; text-shadow: 0 0 10px rgba(255, 187, 0, 0.8); letter-spacing: 2px; text-transform: uppercase;">Combo x1</div>
+                <div class="combo-bar-shell">
+                    <div id="combo-bar-fill-2" style="height: 100%; background: linear-gradient(90deg, #ffaa00 0%, #ffee00 100%); width: 100%; box-shadow: 0 0 8px rgba(255, 200, 0, 0.8); transform-origin: left; transform: scaleX(1);"></div>
+                </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 10px;">
+                <div id="shield-indicator-2" class="status-banner" style="display: none; color: #00aaff; border-color: #00aaff; background: rgba(0, 170, 255, 0.15); box-shadow: 0 0 20px rgba(0, 170, 255, 0.3);">SHIELD ACTIVE</div>
+                <div id="overdrive-indicator-2" class="status-banner" style="display: none; color: #ff00ff; border-color: #ff00ff; background: rgba(255, 0, 255, 0.15); box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);">OVERDRIVE</div>
+            </div>
+        </div>
         <div id="wave-alert"></div>
         <div id="medkit-alert"></div>
         <div id="mode-indicator">First Person</div>
+        <div id="mode-indicator-2">First Person</div>
         <div id="hit-indicator">HIT!</div>
+        <div id="hit-indicator-2">HIT!</div>
         <div id="damage-overlay"></div>
+        <div id="damage-overlay-2"></div>
         <div id="instructions">
             <h1>CyberStrike FPS</h1>
-            <h3>Controls:</h3>
-            <div class="control-item"><span class="key">WASD</span><span class="control-desc">Move</span></div>
-            <div class="control-item"><span class="key">Mouse</span><span class="control-desc">Look Around</span></div>
-            <div class="control-item"><span class="key">Click</span><span class="control-desc">Shoot</span></div>
-            <div class="control-item"><span class="key">Space</span><span class="control-desc">Jump</span></div>
-            <div class="control-item"><span class="key">Shift</span><span class="control-desc">Dash</span></div>
-            <div class="control-item"><span class="key">R</span><span class="control-desc">Reload</span></div>
-            <div class="control-item"><span class="key">Tab</span><span class="control-desc">Toggle Third-Person View</span></div>
-            <div class="control-item"><span class="key">ESC</span><span class="control-desc">Pause</span></div>
-            <p style="color: #ffaa00; margin-top: 20px;">Battle through escalating waves and collect medkits to recover.</p>
-            <button onclick="startGame()">Click to Start</button>
+            <div id="main-menu">
+                <h3>Select Mode</h3>
+                <div id="mode-select">
+                    <button onclick="startGame('classic')">Classic &mdash; Wave Survival</button>
+                    <button class="mode-btn-1v1" onclick="showOnlineLobby()">1v1 Online &mdash; Networked PvP</button>
+                </div>
+                <div id="ctrl-classic" class="ctrl-block active">
+                    <h4>Classic Controls</h4>
+                    <div class="ctrl-row"><span>WASD / Arrows</span><span>Move</span></div>
+                    <div class="ctrl-row"><span>Mouse</span><span>Aim</span></div>
+                    <div class="ctrl-row"><span>Click</span><span>Shoot</span></div>
+                    <div class="ctrl-row"><span>Space</span><span>Jump</span></div>
+                    <div class="ctrl-row"><span>Shift</span><span>Dash</span></div>
+                    <div class="ctrl-row"><span>R</span><span>Reload</span></div>
+                    <div class="ctrl-row"><span>Tab</span><span>Toggle Third-Person</span></div>
+                    <div class="ctrl-row"><span>Esc</span><span>Pause</span></div>
+                </div>
+                <div id="ctrl-1v1" class="ctrl-block p2-block">
+                    <h4>1v1 Online &mdash; Same controls as Classic</h4>
+                    <div class="ctrl-row"><span>Goal</span><span>Last human standing</span></div>
+                    <div class="ctrl-row"><span>Bots</span><span>Auto-balance 50/50 between players</span></div>
+                    <div class="ctrl-row"><span>Friendly Fire</span><span>ON</span></div>
+                    <div class="ctrl-row"><span>Both Die</span><span>Bots Win</span></div>
+                </div>
+            </div>
+            <div id="online-lobby" style="display: none;">
+                <h3 id="lobby-title">Online 1v1</h3>
+                <div id="lobby-choose" style="display: flex; flex-direction: column; gap: 12px; margin: 18px 0;">
+                    <button onclick="hostMatch()">Host a Match</button>
+                    <button class="mode-btn-1v1" onclick="showJoinForm()">Join a Match</button>
+                    <button class="mode-btn-secondary" onclick="backToMainMenu()">Back</button>
+                </div>
+                <div id="lobby-host" style="display: none;">
+                    <p style="color: rgba(255,255,255,0.85); margin: 14px 0 6px;">Share this code with the other player:</p>
+                    <div id="host-code" style="font-size: clamp(18px, 3vh, 28px); color: #00ffd5; text-shadow: 0 0 12px rgba(0,255,213,0.8); letter-spacing: 4px; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid #00ffd5; border-radius: 4px; margin: 8px 0; word-break: break-all;">Connecting...</div>
+                    <button onclick="copyHostCode()" style="margin-top: 6px; padding: 6px 14px; font-size: 12px;">Copy Code</button>
+                    <p id="host-status" style="color: #ffaa00; margin-top: 14px;">Waiting for opponent to join...</p>
+                    <button class="mode-btn-secondary" onclick="cancelLobby()">Cancel</button>
+                </div>
+                <div id="lobby-join" style="display: none;">
+                    <p style="color: rgba(255,255,255,0.85); margin: 14px 0 6px;">Enter the host's code:</p>
+                    <input id="join-code-input" type="text" placeholder="paste code..." autocomplete="off" style="width: 80%; padding: 10px; font-family: inherit; font-size: clamp(14px, 2vh, 18px); background: rgba(0,0,0,0.5); color: #00ffd5; border: 1px solid #00ffd5; border-radius: 4px; text-align: center; letter-spacing: 2px;" />
+                    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 14px;">
+                        <button onclick="joinMatch()">Connect</button>
+                        <button class="mode-btn-secondary" onclick="cancelLobby()">Cancel</button>
+                    </div>
+                    <p id="join-status" style="color: #ffaa00; margin-top: 14px;"></p>
+                </div>
+            </div>
+            <p style="color: #ffaa00; margin-top: 14px; font-size: clamp(10px, 1.2vh, 12px);">In 1v1 Online, friendly fire is ON and bots auto-balance attacks 50/50 between players. Last human standing wins; if both die, bots win.</p>
         </div>
         <div id="pause-menu">
             <h2>Game Paused</h2>
@@ -563,6 +811,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <script>
         let scene, camera, renderer;
         let enemies = [];
@@ -639,13 +888,15 @@
         const bulletPool = [];
 
         function getBullet() {
+            let b;
             if (bulletPool.length > 0) {
-                const b = bulletPool.pop();
+                b = bulletPool.pop();
                 b.visible = true;
-                return b;
+            } else {
+                b = new THREE.Mesh(sharedBulletGeometry, sharedBulletMaterial);
+                scene.add(b);
             }
-            const b = new THREE.Mesh(sharedBulletGeometry, sharedBulletMaterial);
-            scene.add(b);
+            b.userData.netId = nextEntityId++;
             return b;
         }
 
@@ -659,13 +910,15 @@
         const enemyBulletPool = [];
 
         function getEnemyBullet() {
+            let b;
             if (enemyBulletPool.length > 0) {
-                const b = enemyBulletPool.pop();
+                b = enemyBulletPool.pop();
                 b.visible = true;
-                return b;
+            } else {
+                b = new THREE.Mesh(sharedEnemyBulletGeometry, sharedEnemyBulletMaterial);
+                scene.add(b);
             }
-            const b = new THREE.Mesh(sharedEnemyBulletGeometry, sharedEnemyBulletMaterial);
-            scene.add(b);
+            b.userData.netId = nextEntityId++;
             return b;
         }
 
@@ -734,6 +987,7 @@
         let waveAlertTimeout;
         let medkitAlertTimeout;
         let modeIndicatorTimeout;
+        let modeIndicatorTimeout2;
         
         // Game state
         let gameStarted = false;
@@ -771,7 +1025,486 @@
         let muzzleFlash;
         let weaponOffset = new THREE.Vector3(0.3, -0.2, -0.5);
         let weaponRecoil = 0;
-        
+
+        // ===== 1v1 mode state =====
+        let gameMode = 'classic'; // 'classic' | '1v1online'
+        let is1v1 = false;
+        let player2 = null; // Constructed at start of 1v1 (represents the magenta player)
+        let camera2 = null; // P2 camera
+        let p1Alive = true;
+        let p2Alive = true;
+        // PvP balance counters
+        let p1TargetedByCount = 0;
+        let p2TargetedByCount = 0;
+
+        // ===== Online netcode state =====
+        let isOnline1v1 = false;          // True when in networked 1v1 mode
+        let iAmHost = false;              // Host runs authoritative simulation; joiner is a thin client
+        let peer = null;                  // PeerJS Peer instance
+        let conn = null;                  // PeerJS DataConnection
+        let lastNetInput = null;          // Most recent input received by host from joiner
+        let lastSnapshotSendTime = 0;     // Host: when did we last send a snapshot
+        let lastInputSendTime = 0;        // Joiner: when did we last send our input
+        const SNAPSHOT_RATE_HZ = 30;      // Host → joiner snapshots
+        const INPUT_RATE_HZ = 60;         // Joiner → host inputs
+        let nextEntityId = 1;             // Monotonic ID for bots and bullets (host-side)
+        // Joiner-side caches of remote-authoritative state, keyed by entity id
+        let netEnemyState = new Map();    // id → { mesh, type, hp, maxHp, armed }
+        let netBulletState = new Map();   // id → { mesh, isPlayer }
+        let netMedkitState = new Map();   // id → { mesh }
+        let netPowerupState = new Map();  // id → { mesh, type }
+        // Joiner: target position from snapshot to lerp toward
+        let netRemoteTargets = { p1: null, p2: null };
+
+        function localPlayerIdx() {
+            if (!is1v1) return 0;
+            if (!isOnline1v1) return 0; // (legacy local mode would be 0; we no longer ship local 1v1)
+            return iAmHost ? 0 : 1;
+        }
+
+        function remotePlayerIdx() {
+            return 1 - localPlayerIdx();
+        }
+
+        function netSendInput(extra) {
+            if (!conn || !conn.open) return;
+            try {
+                const msg = Object.assign({
+                    t: 'input',
+                    yaw: player2 ? player2.yaw : 0,
+                    pitch: player2 ? player2.pitch : 0,
+                    fwd: !!(keys['w'] || keys['arrowup']),
+                    back: !!(keys['s'] || keys['arrowdown']),
+                    left: !!(keys['a'] || keys['arrowleft']),
+                    right: !!(keys['d'] || keys['arrowright']),
+                    jump: !!keys[' '],
+                    dash: !!keys['shift'],
+                    isFiring: !!isMouseDown
+                }, extra || {});
+                conn.send(msg);
+            } catch (e) { /* ignore network send errors */ }
+        }
+
+        function netSendEvent(payload) {
+            if (!conn || !conn.open) return;
+            try { conn.send(Object.assign({ t: 'event' }, payload)); } catch (e) {}
+        }
+
+        // ===== Lobby UI =====
+        function showOnlineLobby() {
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('online-lobby').style.display = 'block';
+            document.getElementById('lobby-choose').style.display = 'flex';
+            document.getElementById('lobby-host').style.display = 'none';
+            document.getElementById('lobby-join').style.display = 'none';
+        }
+        function backToMainMenu() {
+            cancelLobby();
+            document.getElementById('online-lobby').style.display = 'none';
+            document.getElementById('main-menu').style.display = 'block';
+        }
+        function showJoinForm() {
+            document.getElementById('lobby-choose').style.display = 'none';
+            document.getElementById('lobby-join').style.display = 'block';
+            document.getElementById('join-status').textContent = '';
+            setTimeout(() => { const i = document.getElementById('join-code-input'); if (i) i.focus(); }, 50);
+        }
+        function copyHostCode() {
+            const code = document.getElementById('host-code').textContent;
+            if (navigator.clipboard) navigator.clipboard.writeText(code).catch(() => {});
+        }
+        function cancelLobby() {
+            try { if (conn) { conn.close(); conn = null; } } catch (e) {}
+            try { if (peer) { peer.destroy(); peer = null; } } catch (e) {}
+            document.getElementById('lobby-host').style.display = 'none';
+            document.getElementById('lobby-join').style.display = 'none';
+            document.getElementById('lobby-choose').style.display = 'flex';
+        }
+
+        function getPeerCtor() {
+            // Allow tests to inject a mock via window.__MockPeer
+            return (typeof window !== 'undefined' && window.__MockPeer) ? window.__MockPeer : (typeof Peer === 'undefined' ? null : Peer);
+        }
+
+        function hostMatch() {
+            const PeerCtor = getPeerCtor();
+            if (!PeerCtor) {
+                document.getElementById('host-status').textContent = 'PeerJS library failed to load. Check your network.';
+                return;
+            }
+            document.getElementById('lobby-choose').style.display = 'none';
+            document.getElementById('lobby-host').style.display = 'block';
+            document.getElementById('host-status').textContent = 'Connecting to broker...';
+            document.getElementById('host-code').textContent = 'Connecting...';
+
+            try { if (peer) peer.destroy(); } catch (e) {}
+            peer = new PeerCtor();
+            peer.on('open', (id) => {
+                document.getElementById('host-code').textContent = id;
+                document.getElementById('host-status').textContent = 'Waiting for opponent to join...';
+            });
+            peer.on('connection', (incoming) => {
+                conn = incoming;
+                iAmHost = true;
+                conn.on('open', () => {
+                    document.getElementById('host-status').textContent = 'Connected! Starting match...';
+                    setupNetMessageHandlers();
+                    // Tell joiner to start the match too
+                    try { conn.send({ t: 'start' }); } catch (e) {}
+                    setTimeout(() => startGame('1v1online'), 200);
+                });
+                conn.on('close', () => onNetDisconnect());
+                conn.on('error', () => onNetDisconnect());
+            });
+            peer.on('error', (err) => {
+                document.getElementById('host-status').textContent = 'Error: ' + (err && err.message ? err.message : err);
+            });
+        }
+
+        function joinMatch() {
+            const PeerCtor = getPeerCtor();
+            if (!PeerCtor) {
+                document.getElementById('join-status').textContent = 'PeerJS library failed to load.';
+                return;
+            }
+            const code = document.getElementById('join-code-input').value.trim();
+            if (!code) {
+                document.getElementById('join-status').textContent = 'Please enter a code.';
+                return;
+            }
+            document.getElementById('join-status').textContent = 'Connecting to broker...';
+
+            try { if (peer) peer.destroy(); } catch (e) {}
+            peer = new PeerCtor();
+            peer.on('open', () => {
+                document.getElementById('join-status').textContent = 'Connecting to host...';
+                conn = peer.connect(code, { reliable: false });
+                conn.on('open', () => {
+                    iAmHost = false;
+                    document.getElementById('join-status').textContent = 'Connected! Waiting for host to start...';
+                    setupNetMessageHandlers();
+                });
+                conn.on('close', () => onNetDisconnect());
+                conn.on('error', () => onNetDisconnect());
+            });
+            peer.on('error', (err) => {
+                document.getElementById('join-status').textContent = 'Error: ' + (err && err.message ? err.message : err);
+            });
+        }
+
+        function setupNetMessageHandlers() {
+            if (!conn) return;
+            conn.on('data', (msg) => {
+                if (!msg || typeof msg !== 'object') return;
+                if (msg.t === 'start' && !iAmHost) {
+                    setTimeout(() => startGame('1v1online'), 200);
+                    return;
+                }
+                if (msg.t === 'input' && iAmHost) {
+                    lastNetInput = msg;
+                    // Discrete events: shoot, reload — handled once on receive
+                    if (msg.shoot && player2) {
+                        player2.isFiring = true;
+                        shoot(1);
+                    }
+                    if (msg.shootRelease && player2) {
+                        player2.isFiring = false;
+                    }
+                    if (msg.reloadReq) {
+                        reload(1);
+                    }
+                    return;
+                }
+                if (msg.t === 'snapshot' && !iAmHost) {
+                    applySnapshot(msg);
+                    return;
+                }
+                if (msg.t === 'event' && !iAmHost) {
+                    handleNetEvent(msg);
+                    return;
+                }
+            });
+        }
+
+        function onNetDisconnect() {
+            if (gameStarted && isOnline1v1) {
+                gameStarted = false;
+                gamePaused = true;
+                if (document.exitPointerLock) document.exitPointerLock();
+                const pm = document.getElementById('pause-menu');
+                pm.innerHTML = `
+                    <h2 style="color: #ff3333;">CONNECTION LOST</h2>
+                    <p>Opponent disconnected.</p>
+                    <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: rgba(255, 50, 50, 0.2); color: #ff3333; border: 1px solid #ff3333; cursor: pointer; text-transform: uppercase; font-family: inherit;">Return to Menu</button>
+                `;
+                pm.style.display = 'block';
+            }
+        }
+
+        function handleNetEvent(msg) {
+            // Reserved for future event types. Currently the snapshot carries all state.
+        }
+
+        function showJoinerEndScreen(snap) {
+            if (!gameStarted) return;
+            gameStarted = false;
+            gamePaused = true;
+            if (document.exitPointerLock) document.exitPointerLock();
+            const p1a = snap.p1 && snap.p1.alive;
+            const p2a = snap.p2 && snap.p2.alive;
+            let headline;
+            if (!p1a && !p2a) {
+                headline = '<h2 style="color:#ff4d4d; text-shadow:0 0 18px rgba(255,80,80,0.9);">BOTS WIN</h2><p>Both operatives eliminated.</p>';
+            } else if (p1a && !p2a) {
+                headline = '<h2 style="color:#00ffd5; text-shadow:0 0 18px rgba(0,255,213,0.9);">PLAYER 1 VICTORY</h2>';
+            } else {
+                headline = '<h2 style="color:#ff8ee0; text-shadow:0 0 18px rgba(255,142,224,0.9);">PLAYER 2 VICTORY</h2>';
+            }
+            const p1Stats = snap.p1 ? `P1 &mdash; ${snap.p1.kills} kills / ${snap.p1.score} score` : '';
+            const p2Stats = snap.p2 ? `P2 &mdash; ${snap.p2.kills} kills / ${snap.p2.score} score` : '';
+            const pm = document.getElementById('pause-menu');
+            pm.innerHTML = `
+                ${headline}
+                <p style="margin-top:14px;">${p1Stats}</p>
+                <p>${p2Stats}</p>
+                <p style="margin-top:6px;">Wave Reached: <span style="color:#00ffd5">${snap.wave}</span></p>
+                <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: rgba(0, 255, 213, 0.12); color: #00ffd5; border: 1px solid #00ffd5; cursor: pointer; text-transform: uppercase; font-family: inherit;">Reboot System</button>
+            `;
+            pm.style.display = 'block';
+        }
+
+        // ===== Snapshot (host → joiner) =====
+        function buildSnapshot() {
+            const snap = { t: 'snapshot', ts: Date.now() };
+            // Players
+            snap.p1 = {
+                x: yawObject.position.x, y: yawObject.position.y, z: yawObject.position.z,
+                yaw: yaw, pitch: pitch,
+                hp: health, maxHp: maxHealth, ammo: ammo, kills: kills, score: score,
+                comboMult: comboMultiplier, comboLeft: comboTimeLeft,
+                shield: shieldActive, shieldLeft: shieldTimeLeft,
+                overdrive: overdriveActive, overdriveLeft: overdriveTimeLeft,
+                isReloading: isReloading, isDashing: isDashing, dashCooldown: dashCooldown,
+                alive: p1Alive
+            };
+            snap.p2 = player2 ? {
+                x: player2.yawObject.position.x, y: player2.yawObject.position.y, z: player2.yawObject.position.z,
+                yaw: player2.yaw, pitch: player2.pitch,
+                hp: player2.health, maxHp: maxHealth, ammo: player2.ammo, kills: player2.kills, score: player2.score,
+                comboMult: player2.comboMultiplier, comboLeft: player2.comboTimeLeft,
+                shield: player2.shieldActive, shieldLeft: player2.shieldTimeLeft,
+                overdrive: player2.overdriveActive, overdriveLeft: player2.overdriveTimeLeft,
+                isReloading: player2.isReloading, isDashing: player2.isDashing, dashCooldown: player2.dashCooldown,
+                alive: p2Alive
+            } : null;
+            // Bots
+            snap.bots = enemies.map(e => ({
+                id: e.userData.netId,
+                x: e.position.x, y: e.position.y, z: e.position.z,
+                ry: e.rotation.y,
+                hp: e.userData.health, maxHp: e.userData.maxHealth,
+                type: e.userData.type,
+                armed: !!e.userData.isArmed
+            }));
+            // Bullets (player & enemy combined with isPlayer flag)
+            snap.bullets = [];
+            for (const b of bullets) snap.bullets.push({ id: b.userData.netId, x: b.position.x, y: b.position.y, z: b.position.z, p: 1 });
+            for (const b of enemyBullets) snap.bullets.push({ id: b.userData.netId, x: b.position.x, y: b.position.y, z: b.position.z, p: 0 });
+            snap.wave = wave;
+            // Compact medkits / powerups
+            snap.medkits = medkits.map(m => ({ id: m.userData.netId, x: m.position.x, y: m.position.y, z: m.position.z }));
+            snap.powerups = powerups.map(p => ({ id: p.userData.netId, x: p.position.x, y: p.position.y, z: p.position.z, ty: p.userData.type }));
+            return snap;
+        }
+
+        function applySnapshot(snap) {
+            // Apply to remote player (player1 = host = remote from joiner's POV)
+            if (snap.p1 && yawObject) {
+                netRemoteTargets.p1 = snap.p1;
+                yawObject.position.set(snap.p1.x, snap.p1.y, snap.p1.z);
+                yawObject.rotation.y = snap.p1.yaw;
+                if (pitchObject) pitchObject.rotation.x = snap.p1.pitch;
+                const wasAlive = p1Alive;
+                p1Alive = snap.p1.alive;
+                health = snap.p1.hp;
+                ammo = snap.p1.ammo;
+                kills = snap.p1.kills;
+                score = snap.p1.score;
+                if (playerModel) {
+                    playerModel.position.set(snap.p1.x, snap.p1.y - 1.6, snap.p1.z);
+                    playerModel.rotation.y = snap.p1.yaw;
+                    playerModel.visible = wasAlive && p1Alive;
+                }
+                if (!p1Alive && weapon) weapon.visible = false;
+            }
+            // Apply to local player2 (joiner's own state) — mirror of authoritative host values
+            if (snap.p2 && player2) {
+                const prevHp = player2.health;
+                player2.health = snap.p2.hp;
+                player2.ammo = snap.p2.ammo;
+                player2.kills = snap.p2.kills;
+                player2.score = snap.p2.score;
+                player2.comboMultiplier = snap.p2.comboMult;
+                player2.comboTimeLeft = snap.p2.comboLeft;
+                player2.shieldActive = snap.p2.shield;
+                player2.shieldTimeLeft = snap.p2.shieldLeft;
+                player2.overdriveActive = snap.p2.overdrive;
+                player2.overdriveTimeLeft = snap.p2.overdriveLeft;
+                player2.isReloading = snap.p2.isReloading;
+                player2.dashCooldown = snap.p2.dashCooldown;
+                const wasP2Alive = p2Alive;
+                p2Alive = snap.p2.alive;
+                // Position: authoritative (host has the final say)
+                player2.yawObject.position.set(snap.p2.x, snap.p2.y, snap.p2.z);
+                if (player2.playerModel) {
+                    player2.playerModel.position.set(snap.p2.x, snap.p2.y - 1.6, snap.p2.z);
+                    player2.playerModel.rotation.y = player2.yaw;
+                }
+                if (!p2Alive && player2.weapon) player2.weapon.visible = false;
+                // Flash damage overlay locally if my HP just dropped
+                if (snap.p2.hp < prevHp && !iAmHost) {
+                    showDamageOverlayFor(localPlayerIdx());
+                }
+                // Update shield / overdrive DOM on joiner's local HUD
+                if (!iAmHost) {
+                    const shieldEl = document.getElementById('shield-indicator');
+                    if (shieldEl) shieldEl.style.display = snap.p2.shield ? 'block' : 'none';
+                    const odEl = document.getElementById('overdrive-indicator');
+                    if (odEl) odEl.style.display = snap.p2.overdrive ? 'block' : 'none';
+                }
+                // Detect death-to-win-screen transition on the joiner
+                if (wasP2Alive && !p2Alive && !iAmHost) {
+                    showJoinerEndScreen(snap);
+                }
+            }
+            // Detect host death on joiner side
+            if (snap.p1 && !iAmHost) {
+                if (!snap.p1.alive && (!snap.p2 || !snap.p2.alive)) {
+                    if (gameStarted) showJoinerEndScreen(snap);
+                } else if (!snap.p1.alive && snap.p2 && snap.p2.alive) {
+                    if (gameStarted) showJoinerEndScreen(snap);
+                }
+            }
+            wave = snap.wave;
+            updateHUDFor(0);
+            updateHUDFor(1);
+            // Bots: reconcile (remove missing, add new, update existing)
+            const seenBots = new Set();
+            for (const bs of snap.bots) {
+                seenBots.add(bs.id);
+                let entry = netEnemyState.get(bs.id);
+                if (!entry) {
+                    // Spawn placeholder mesh on joiner side
+                    const geom = bs.type === 'speedster' ? sharedSpeedsterGeometry : (bs.type === 'brute' ? sharedBruteGeometry : sharedEnemyGeometry);
+                    const matProto = bs.type === 'speedster' ? speedsterMaterialProto : (bs.type === 'brute' ? bruteMaterialProto : enemyMaterialProto);
+                    const mat = matProto.clone();
+                    const m = new THREE.Mesh(geom, mat);
+                    scene.add(m);
+                    entry = { mesh: m };
+                    netEnemyState.set(bs.id, entry);
+                }
+                entry.mesh.position.set(bs.x, bs.y, bs.z);
+                entry.mesh.rotation.y = bs.ry;
+            }
+            for (const [id, entry] of netEnemyState) {
+                if (!seenBots.has(id)) {
+                    scene.remove(entry.mesh);
+                    netEnemyState.delete(id);
+                }
+            }
+            // Bullets
+            const seenBullets = new Set();
+            for (const bs of snap.bullets) {
+                seenBullets.add(bs.id);
+                let entry = netBulletState.get(bs.id);
+                if (!entry) {
+                    const geom = sharedBulletGeometry;
+                    const mat = bs.p ? sharedBulletMaterial : sharedEnemyBulletMaterial;
+                    const m = new THREE.Mesh(geom, mat);
+                    scene.add(m);
+                    entry = { mesh: m };
+                    netBulletState.set(bs.id, entry);
+                }
+                entry.mesh.position.set(bs.x, bs.y, bs.z);
+            }
+            for (const [id, entry] of netBulletState) {
+                if (!seenBullets.has(id)) {
+                    scene.remove(entry.mesh);
+                    netBulletState.delete(id);
+                }
+            }
+            // Medkits
+            const seenMedkits = new Set();
+            for (const ms of (snap.medkits || [])) {
+                seenMedkits.add(ms.id);
+                let entry = netMedkitState.get(ms.id);
+                if (!entry) {
+                    const m = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.7, 0.3, 0.7),
+                        new THREE.MeshStandardMaterial({ color: 0x00ffcc, emissive: 0x00ffcc, emissiveIntensity: 0.6, metalness: 0.3, roughness: 0.2 })
+                    );
+                    scene.add(m);
+                    entry = { mesh: m };
+                    netMedkitState.set(ms.id, entry);
+                }
+                entry.mesh.position.set(ms.x, ms.y, ms.z);
+                entry.mesh.rotation.y += 0.04;
+            }
+            for (const [id, entry] of netMedkitState) {
+                if (!seenMedkits.has(id)) { scene.remove(entry.mesh); netMedkitState.delete(id); }
+            }
+            // Powerups
+            const seenPowerups = new Set();
+            for (const ps of (snap.powerups || [])) {
+                seenPowerups.add(ps.id);
+                let entry = netPowerupState.get(ps.id);
+                if (!entry) {
+                    const color = ps.ty === 'shield' ? 0x00aaff : 0xff00ff;
+                    const m = new THREE.Mesh(
+                        new THREE.OctahedronGeometry(0.4),
+                        new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 0.8, metalness: 0.5, roughness: 0.1 })
+                    );
+                    scene.add(m);
+                    entry = { mesh: m, type: ps.ty };
+                    netPowerupState.set(ps.id, entry);
+                }
+                entry.mesh.position.set(ps.x, ps.y, ps.z);
+                entry.mesh.rotation.y += 0.05;
+            }
+            for (const [id, entry] of netPowerupState) {
+                if (!seenPowerups.has(id)) { scene.remove(entry.mesh); netPowerupState.delete(id); }
+            }
+        }
+
+        function getPlayerYawObject(idx) {
+            return idx === 0 ? yawObject : (player2 ? player2.yawObject : yawObject);
+        }
+        function getPlayerPosition(idx) {
+            return getPlayerYawObject(idx).position;
+        }
+        function isPlayerAlive(idx) {
+            return idx === 0 ? p1Alive : p2Alive;
+        }
+        function getActivePlayerIndices() {
+            return is1v1 ? [0, 1] : [0];
+        }
+        function getAliveActivePlayerIndices() {
+            const out = [];
+            if (p1Alive) out.push(0);
+            if (is1v1 && p2Alive) out.push(1);
+            return out;
+        }
+        function incTargetedCount(idx) {
+            if (idx === 0) p1TargetedByCount++; else p2TargetedByCount++;
+        }
+        function decTargetedCount(idx) {
+            if (idx === 0) p1TargetedByCount = Math.max(0, p1TargetedByCount - 1);
+            else p2TargetedByCount = Math.max(0, p2TargetedByCount - 1);
+        }
+        function getTargetedCount(idx) {
+            return idx === 0 ? p1TargetedByCount : p2TargetedByCount;
+        }
+
         function init() {
             // Scene setup
             scene = new THREE.Scene();
@@ -1309,16 +2042,17 @@
             return findAlternativeDirection(currentPosition, intendedDirection, speed);
         }
 
-        function getPathDirectionForEnemy(enemy, delta) {
+        function getPathDirectionForEnemy(enemy, delta, targetPos) {
             if (!navigationGrid.cells || navigationGrid.cells.length === 0) return null;
+            const goalPos = targetPos || yawObject.position;
 
             enemy.userData.pathRecalcTimer = (enemy.userData.pathRecalcTimer || 0) - delta;
 
-            const targetCell = worldToGrid(yawObject.position);
+            const targetCell = worldToGrid(goalPos);
             const targetKey = targetCell ? getCellIndex(targetCell.x, targetCell.z) : null;
 
             if (enemy.userData.pathRecalcTimer <= 0) {
-                const newPath = findPath(enemy.position, yawObject.position);
+                const newPath = findPath(enemy.position, goalPos);
                 if (newPath && newPath.length > 0) {
                     enemy.userData.path = newPath;
                     enemy.userData.pathTargetKey = targetKey;
@@ -1455,7 +2189,7 @@
             weapon = weaponGroup;
             camera.add(weapon);
             weapon.position.copy(weaponOffset);
-            
+
             // Muzzle flash
             const flashGeometry = new THREE.SphereGeometry(0.15, 8, 8);
             const flashMaterial = new THREE.MeshBasicMaterial({
@@ -1467,7 +2201,192 @@
             muzzleFlash.position.z = -0.5;
             weapon.add(muzzleFlash);
         }
-        
+
+        function buildWeaponForCamera(targetCamera) {
+            const weaponGroup = new THREE.Group();
+            const body = new THREE.Mesh(
+                new THREE.BoxGeometry(0.1, 0.1, 0.4),
+                new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.3, metalness: 0.8 })
+            );
+            weaponGroup.add(body);
+            const barrel = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.02, 0.02, 0.3),
+                new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.2, metalness: 0.9 })
+            );
+            barrel.rotation.x = Math.PI / 2;
+            barrel.position.z = -0.35;
+            weaponGroup.add(barrel);
+            const sight = new THREE.Mesh(
+                new THREE.BoxGeometry(0.02, 0.04, 0.02),
+                new THREE.MeshStandardMaterial({ color: 0xff00ff, emissive: 0xff00ff, emissiveIntensity: 0.5 })
+            );
+            sight.position.set(0, 0.07, -0.1);
+            weaponGroup.add(sight);
+            targetCamera.add(weaponGroup);
+            weaponGroup.position.copy(weaponOffset);
+            const flash = new THREE.Mesh(
+                new THREE.SphereGeometry(0.15, 8, 8),
+                new THREE.MeshBasicMaterial({ color: 0xff66ff, transparent: true, opacity: 0 })
+            );
+            flash.position.z = -0.5;
+            weaponGroup.add(flash);
+            return { weapon: weaponGroup, muzzleFlash: flash };
+        }
+
+        function buildPlayerModelMagenta() {
+            const group = new THREE.Group();
+            const armorMaterial = new THREE.MeshStandardMaterial({
+                color: 0xff1f8a, emissive: 0xff0caa, emissiveIntensity: 0.6,
+                metalness: 0.9, roughness: 0.2
+            });
+            const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 1.4, 16), armorMaterial);
+            torso.position.y = 1.1;
+            group.add(torso);
+            const shoulderPad = new THREE.Mesh(new THREE.TorusGeometry(0.65, 0.1, 12, 32), new THREE.MeshStandardMaterial({
+                color: 0xff00ff, emissive: 0xff00ff, emissiveIntensity: 0.5, metalness: 1, roughness: 0.15
+            }));
+            shoulderPad.position.y = 1.45;
+            shoulderPad.rotation.x = Math.PI / 2;
+            group.add(shoulderPad);
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.35, 16, 16), new THREE.MeshStandardMaterial({
+                color: 0x2a1133, emissive: 0xff00aa, emissiveIntensity: 0.4, metalness: 0.6, roughness: 0.4
+            }));
+            head.position.y = 1.95;
+            group.add(head);
+            const visor = new THREE.Mesh(new THREE.TorusGeometry(0.36, 0.06, 12, 32), new THREE.MeshBasicMaterial({
+                color: 0xff66ff, transparent: true, opacity: 0.6
+            }));
+            visor.rotation.x = Math.PI / 2;
+            visor.position.y = 1.95;
+            group.add(visor);
+            const legsMaterial = armorMaterial.clone();
+            legsMaterial.emissiveIntensity = 0.3;
+            const leftLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.25, 1.2, 12), legsMaterial);
+            leftLeg.position.set(-0.2, 0.4, 0);
+            group.add(leftLeg);
+            const rightLeg = leftLeg.clone();
+            rightLeg.position.x = 0.2;
+            group.add(rightLeg);
+            const light = new THREE.PointLight(0xff1f9b, 0.8, 6);
+            light.position.set(0, 1.3, 0.3);
+            group.add(light);
+            group.visible = false;
+            scene.add(group);
+            return group;
+        }
+
+        function createPlayer2() {
+            const yaw2 = new THREE.Object3D();
+            const pitch2 = new THREE.Object3D();
+            const halfAspect = (window.innerWidth / 2) / window.innerHeight;
+            const cam2 = new THREE.PerspectiveCamera(75, halfAspect, 0.1, 1000);
+            yaw2.add(pitch2);
+            pitch2.add(cam2);
+            yaw2.position.set(12, 1.6, 0);
+            yaw2.rotation.y = -Math.PI / 2; // Face -X (toward P1)
+            scene.add(yaw2);
+
+            const { weapon: w2, muzzleFlash: f2 } = buildWeaponForCamera(cam2);
+            const pm2 = buildPlayerModelMagenta();
+            camera2 = cam2;
+
+            player2 = {
+                yawObject: yaw2,
+                pitchObject: pitch2,
+                camera: cam2,
+                yaw: -Math.PI / 2,
+                pitch: 0,
+                velocity: new THREE.Vector3(),
+                direction: new THREE.Vector3(),
+                canJump: true,
+                isDashing: false,
+                dashVelocity: new THREE.Vector3(),
+                dashTime: 0,
+                dashCooldown: 0,
+                health: maxHealth,
+                ammo: maxAmmo,
+                isReloading: false,
+                lastShotTime: 0,
+                lastDamageTime: Date.now(),
+                kills: 0,
+                score: 0,
+                comboMultiplier: 1,
+                comboTimeLeft: 0,
+                shieldActive: false,
+                shieldTimeLeft: 0,
+                overdriveActive: false,
+                overdriveTimeLeft: 0,
+                rapidFireEnabled: false,
+                weapon: w2,
+                muzzleFlash: f2,
+                weaponRecoil: 0,
+                playerModel: pm2,
+                thirdPerson: false,
+                cameraOffsetTarget: firstPersonCameraOffset.clone(),
+                cameraCurrentOffset: firstPersonCameraOffset.clone(),
+                screenShake: 0,
+                isFiring: false
+            };
+
+            // Reposition P1 for 1v1 spawn
+            yawObject.position.set(-12, 1.6, 0);
+            yawObject.rotation.y = Math.PI / 2; // Face +X (toward P2)
+            yaw = Math.PI / 2;
+            pitch = 0;
+            pitchObject.rotation.x = 0;
+
+            // Magenta-tint P1's playerModel visor head? No — keep P1 cyan/blue (default).
+        }
+
+        function destroyPlayer2() {
+            if (!player2) return;
+            scene.remove(player2.yawObject);
+            scene.remove(player2.playerModel);
+            player2 = null;
+            camera2 = null;
+        }
+
+        // ===== Bot targeting (50/50 balance + nearest preference) =====
+        function pickTargetForEnemy(enemy) {
+            const alive = getAliveActivePlayerIndices();
+            if (alive.length === 0) return null;
+            if (alive.length === 1) return alive[0];
+            // Compute nearest
+            const d0 = enemy.position.distanceTo(getPlayerPosition(0));
+            const d1 = enemy.position.distanceTo(getPlayerPosition(1));
+            const nearest = d0 <= d1 ? 0 : 1;
+            const other = 1 - nearest;
+            // 50/50 hysteresis: if assigning to nearest would push imbalance > 1, pick other
+            if ((getTargetedCount(nearest) + 1) - getTargetedCount(other) > 1) {
+                return other;
+            }
+            return nearest;
+        }
+
+        function assignEnemyTarget(enemy, newIdx) {
+            if (newIdx == null) return;
+            const prev = enemy.userData.targetPlayer;
+            if (prev === newIdx) return;
+            if (prev != null) decTargetedCount(prev);
+            enemy.userData.targetPlayer = newIdx;
+            incTargetedCount(newIdx);
+        }
+
+        function reassignEnemiesFromDeadPlayer(deadIdx) {
+            for (const enemy of enemies) {
+                if (enemy.userData.targetPlayer === deadIdx) {
+                    decTargetedCount(deadIdx);
+                    enemy.userData.targetPlayer = null;
+                    const newTarget = pickTargetForEnemy(enemy);
+                    if (newTarget != null) {
+                        enemy.userData.targetPlayer = newTarget;
+                        incTargetedCount(newTarget);
+                    }
+                    enemy.userData.targetReassessTimer = 2.5 + Math.random();
+                }
+            }
+        }
+
         function createEnemy() {
             const spawnPosition = getSpawnPosition();
 
@@ -1567,96 +2486,111 @@
                 }
             }
 
+            enemy.userData.netId = nextEntityId++;
             enemies.push(enemy);
             scene.add(enemy);
+
+            // Assign target player (50/50 in 1v1; always P1 in classic)
+            enemy.userData.targetPlayer = null;
+            enemy.userData.targetReassessTimer = 2.5 + Math.random();
+            const initialTarget = pickTargetForEnemy(enemy);
+            if (initialTarget != null) {
+                enemy.userData.targetPlayer = initialTarget;
+                incTargetedCount(initialTarget);
+            }
         }
 
-        function getFireRateLevel() {
-            if (kills >= 45 || wave >= 6) return 4;
-            if (kills >= 35 || wave >= 5) return 3;
-            if (kills >= 25 || wave >= 3) return 2;
+        function getFireRateLevel(killsArg, waveArg) {
+            const k = (killsArg !== undefined) ? killsArg : kills;
+            const w = (waveArg !== undefined) ? waveArg : wave;
+            if (k >= 45 || w >= 6) return 4;
+            if (k >= 35 || w >= 5) return 3;
+            if (k >= 25 || w >= 3) return 2;
             return 1;
         }
-        
-        function shoot() {
-            if (!gameStarted || gamePaused || isReloading || ammo <= 0) return;
+        // Backward-compatible reference (will be redefined below)
+        function shoot(playerIdx) {
+            if (playerIdx === undefined) playerIdx = 0;
+            if (!gameStarted || gamePaused) return;
+            if (!isPlayerAlive(playerIdx)) return;
+
+            const isP2 = (playerIdx === 1);
+            const p = isP2 ? player2 : null;
+            const myAmmo = isP2 ? p.ammo : ammo;
+            const myReloading = isP2 ? p.isReloading : isReloading;
+            const myLastShot = isP2 ? p.lastShotTime : lastShotTime;
+            const myOverdrive = isP2 ? p.overdriveActive : overdriveActive;
+            const myKills = isP2 ? p.kills : kills;
+            const myCamera = isP2 ? p.camera : camera;
+            const myWeapon = isP2 ? p.weapon : weapon;
+            const myMuzzle = isP2 ? p.muzzleFlash : muzzleFlash;
+
+            if (myReloading || myAmmo <= 0) return;
 
             const now = Date.now();
-            const fireRateLevel = overdriveActive ? 4 : getFireRateLevel();
-            const currentFireRate = baseFireRate * (overdriveActive ? 0.2 : fireRateMultipliers[fireRateLevel - 1]);
-            if (now - lastShotTime < currentFireRate) return;
-            lastShotTime = now;
+            const fireRateLevel = myOverdrive ? 4 : getFireRateLevel(myKills, wave);
+            const currentFireRate = baseFireRate * (myOverdrive ? 0.2 : fireRateMultipliers[fireRateLevel - 1]);
+            if (now - myLastShot < currentFireRate) return;
 
-            // Screen shake
-            screenShake = 0.05;
+            if (isP2) p.lastShotTime = now; else lastShotTime = now;
 
-            // Weapon recoil animation
-            weaponRecoil = 0.2;
+            if (isP2) p.screenShake = 0.05; else screenShake = 0.05;
+            if (isP2) p.weaponRecoil = 0.2; else weaponRecoil = 0.2;
 
-            // Muzzle flash
-            muzzleFlash.material.opacity = 1;
-            setTimeout(() => {
-                muzzleFlash.material.opacity = 0;
-            }, 50);
-            
-            // Create bullet from pool
+            myMuzzle.material.opacity = 1;
+            setTimeout(() => { myMuzzle.material.opacity = 0; }, 50);
+
             const bullet = getBullet();
-            
-            // Get proper bullet direction using camera's world direction
             const bulletDirection = new THREE.Vector3();
-            camera.getWorldDirection(bulletDirection);
-            
-            // Get camera world position
+            myCamera.getWorldDirection(bulletDirection);
             const cameraWorldPosition = new THREE.Vector3();
-            camera.getWorldPosition(cameraWorldPosition);
-            
+            myCamera.getWorldPosition(cameraWorldPosition);
+
             bullet.position.copy(cameraWorldPosition);
             if (!bullet.userData.velocity) bullet.userData.velocity = new THREE.Vector3();
             bullet.userData.velocity.copy(bulletDirection).multiplyScalar(100);
             bullet.userData.life = 100;
             bullet.userData.hasHit = false;
             bullet.userData.isPlayerBullet = true;
-            
-            bullets.push(bullet);
-            
-            // Create particle effect at muzzle
-            createMuzzleParticles();
-            
-            // Update ammo
-            if (!overdriveActive) {
-                ammo--;
-                updateHUD();
+            bullet.userData.shooterIndex = playerIdx;
 
-                // Auto reload
-                if (ammo === 0) {
-                    reload();
+            bullets.push(bullet);
+
+            createMuzzleParticlesFor(playerIdx);
+
+            if (!myOverdrive) {
+                if (isP2) p.ammo--; else ammo--;
+                updateHUDFor(playerIdx);
+                const newAmmo = isP2 ? p.ammo : ammo;
+                if (newAmmo === 0) {
+                    reload(playerIdx);
                 }
             }
         }
         
         function enemyShoot(enemy) {
-            // Create enemy bullet from pool
+            const targetIdx = (enemy.userData.targetPlayer != null && isPlayerAlive(enemy.userData.targetPlayer))
+                ? enemy.userData.targetPlayer : 0;
+            const targetPos = getPlayerPosition(targetIdx);
+
             const bullet = getEnemyBullet();
-            
-            // Calculate direction from enemy to player
             const bulletDirection = new THREE.Vector3();
-            bulletDirection.subVectors(yawObject.position, enemy.position);
+            bulletDirection.subVectors(targetPos, enemy.position);
             bulletDirection.normalize();
-            
+
             bullet.position.copy(enemy.position);
-            bullet.position.y += 1; // Shoot from chest level
+            bullet.position.y += 1;
             if (!bullet.userData.velocity) bullet.userData.velocity = new THREE.Vector3();
             bullet.userData.velocity.copy(bulletDirection).multiplyScalar(80);
             bullet.userData.life = 100;
             bullet.userData.hasHit = false;
             bullet.userData.isPlayerBullet = false;
-            
+            bullet.userData.targetPlayer = targetIdx;
+
             enemyBullets.push(bullet);
-            
-            // Create muzzle flash for enemy
+
             createEnemyMuzzleFlash(enemy);
-            
-            // Update enemy's last shot time
+
             enemy.userData.lastShotTime = Date.now();
         }
         
@@ -1683,13 +2617,19 @@
         }
         
         function createMuzzleParticles() {
+            createMuzzleParticlesFor(0);
+        }
+        function createMuzzleParticlesFor(playerIdx) {
+            const w = playerIdx === 1 && player2 ? player2.weapon : weapon;
+            const m = playerIdx === 1 && player2 ? player2.muzzleFlash : muzzleFlash;
+            const color = playerIdx === 1 ? 0xff66aa : 0xffaa00;
             for (let i = 0; i < 10; i++) {
-                const particle = getParticle(false, 0xffaa00);
-                
+                const particle = getParticle(false, color);
+
                 const worldPosition = new THREE.Vector3();
-                weapon.localToWorld(worldPosition.copy(muzzleFlash.position));
+                w.localToWorld(worldPosition.copy(m.position));
                 particle.position.copy(worldPosition);
-                
+
                 if (!particle.userData.velocity) particle.userData.velocity = new THREE.Vector3();
                 particle.userData.velocity.set(
                     (Math.random() - 0.5) * 5,
@@ -1697,7 +2637,7 @@
                     (Math.random() - 0.5) * 5
                 );
                 particle.userData.life = 30;
-                
+
                 particles.push(particle);
             }
         }
@@ -1726,7 +2666,13 @@
         }
 
         function showHitIndicator(isHeadshot = false) {
-            const hitIndicator = document.getElementById('hit-indicator');
+            showHitIndicatorFor(0, isHeadshot);
+        }
+
+        function showHitIndicatorFor(playerIdx, isHeadshot = false) {
+            const suffix = playerIdx === 1 ? '-2' : '';
+            const hitIndicator = document.getElementById('hit-indicator' + suffix);
+            if (!hitIndicator) return;
             hitIndicator.textContent = isHeadshot ? 'HEADSHOT!' : 'HIT!';
             hitIndicator.style.color = isHeadshot ? '#ffbb00' : '#ff0000';
             hitIndicator.style.opacity = '1';
@@ -1736,125 +2682,335 @@
         }
 
         function showDamageOverlay() {
-            const damageOverlay = document.getElementById('damage-overlay');
+            showDamageOverlayFor(0);
+        }
+
+        function showDamageOverlayFor(playerIdx) {
+            const suffix = playerIdx === 1 ? '-2' : '';
+            const damageOverlay = document.getElementById('damage-overlay' + suffix);
+            if (!damageOverlay) return;
             damageOverlay.style.opacity = '1';
             setTimeout(() => {
                 damageOverlay.style.opacity = '0';
             }, 300);
         }
+
+        // ===== Per-player state accessors =====
+        function getShieldActive(idx) {
+            return idx === 0 ? shieldActive : (player2 ? player2.shieldActive : false);
+        }
+        function setPlayerHealth(idx, v) {
+            if (idx === 0) health = v;
+            else if (player2) player2.health = v;
+        }
+        function getPlayerHealth(idx) {
+            return idx === 0 ? health : (player2 ? player2.health : 0);
+        }
+        function setPlayerLastDamageTime(idx, t) {
+            if (idx === 0) lastDamageTime = t;
+            else if (player2) player2.lastDamageTime = t;
+        }
+        function setPlayerScreenShake(idx, v) {
+            if (idx === 0) screenShake = v;
+            else if (player2) player2.screenShake = v;
+        }
+
+        // Apply damage to a player. Returns true if this kill triggered death.
+        function applyDamageToPlayer(idx, amount, showOverlay, attackerIdx) {
+            if (!isPlayerAlive(idx)) return false;
+            if (getShieldActive(idx)) return false;
+            const newHp = getPlayerHealth(idx) - amount;
+            setPlayerHealth(idx, newHp);
+            setPlayerLastDamageTime(idx, Date.now());
+            setPlayerScreenShake(idx, 0.15);
+            if (showOverlay) showDamageOverlayFor(idx);
+            if (attackerIdx != null) {
+                if (idx === 0) lastAttackerOfP1 = attackerIdx;
+                else if (player2) player2.lastAttacker = attackerIdx;
+            }
+            updateHUDFor(idx);
+            if (newHp <= 0) {
+                onPlayerDeath(idx);
+                return true;
+            }
+            return false;
+        }
+
+        let lastAttackerOfP1 = null;
+
+        function onPlayerDeath(idx) {
+            if (idx === 0) {
+                if (!p1Alive) return;
+                p1Alive = false;
+                if (weapon) weapon.visible = false;
+                if (playerModel) playerModel.visible = false;
+            } else {
+                if (!p2Alive) return;
+                p2Alive = false;
+                if (player2) {
+                    if (player2.weapon) player2.weapon.visible = false;
+                    if (player2.playerModel) player2.playerModel.visible = false;
+                }
+            }
+            // Reassign bots that targeted the dead player
+            reassignEnemiesFromDeadPlayer(idx);
+
+            if (!is1v1) {
+                // Classic: existing game over flow
+                gameOverClassic();
+                return;
+            }
+
+            // 1v1 win check
+            const alive = getAliveActivePlayerIndices();
+            if (alive.length === 1) {
+                endMatch1v1(alive[0], false);
+            } else if (alive.length === 0) {
+                endMatch1v1(null, true);
+            }
+        }
+
+        function endMatch1v1(winnerIdx, botsWin) {
+            gameStarted = false;
+            gamePaused = true;
+            if (document.exitPointerLock) document.exitPointerLock();
+
+            const p1Stats = `P1 &mdash; ${kills} kills / ${score} score`;
+            const p2Stats = player2 ? `P2 &mdash; ${player2.kills} kills / ${player2.score} score` : '';
+            const headline = botsWin
+                ? '<h2 style="color:#ff4d4d; text-shadow:0 0 18px rgba(255,80,80,0.9);">BOTS WIN</h2><p>Both operatives eliminated.</p>'
+                : (winnerIdx === 0
+                    ? '<h2 style="color:#00ffd5; text-shadow:0 0 18px rgba(0,255,213,0.9);">PLAYER 1 VICTORY</h2>'
+                    : '<h2 style="color:#ff8ee0; text-shadow:0 0 18px rgba(255,142,224,0.9);">PLAYER 2 VICTORY</h2>');
+
+            const pauseMenu = document.getElementById('pause-menu');
+            pauseMenu.innerHTML = `
+                ${headline}
+                <p style="margin-top:14px;">${p1Stats}</p>
+                <p>${p2Stats}</p>
+                <p style="margin-top:6px;">Wave Reached: <span style="color:#00ffd5">${wave}</span></p>
+                <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: rgba(0, 255, 213, 0.12); color: #00ffd5; border: 1px solid #00ffd5; cursor: pointer; text-transform: uppercase; font-family: inherit;">Reboot System</button>
+            `;
+            pauseMenu.style.display = 'block';
+            pauseMenu.style.borderColor = botsWin ? 'rgba(255, 80, 80, 0.6)' : 'rgba(0, 255, 213, 0.6)';
+            pauseMenu.style.boxShadow = botsWin ? '0 0 30px rgba(255, 0, 0, 0.3)' : '0 0 30px rgba(0, 255, 213, 0.3)';
+        }
+
+        function gameOverClassic() {
+            gameStarted = false;
+            gamePaused = true;
+            if (document.exitPointerLock) document.exitPointerLock();
+
+            const pauseMenu = document.getElementById('pause-menu');
+            pauseMenu.innerHTML = `
+                <h2 style="color: #ff3333; text-shadow: 0 0 15px rgba(255, 50, 50, 0.8);">SYSTEM FAILURE</h2>
+                <p>Wave Reached: <span style="color: #00ffd5">${wave}</span></p>
+                <p>Kills: <span style="color: #00ffd5">${kills}</span></p>
+                <p>Score: <span style="color: #00ffd5">${score}</span></p>
+                <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: rgba(255, 50, 50, 0.2); color: #ff3333; border: 1px solid #ff3333; cursor: pointer; text-transform: uppercase; font-family: inherit;">Reboot System</button>
+            `;
+            pauseMenu.style.display = 'block';
+            pauseMenu.style.borderColor = 'rgba(255, 50, 50, 0.5)';
+            pauseMenu.style.boxShadow = '0 0 30px rgba(255, 0, 0, 0.3)';
+        }
         
-        function reload() {
-            if (isReloading) return;
-            isReloading = true;
-            const reloadIndicator = document.getElementById('reload-indicator');
-            reloadIndicator.textContent = 'Reloading...';
-            reloadIndicator.classList.add('reloading');
+        function reload(playerIdx) {
+            if (playerIdx === undefined) playerIdx = 0;
+            const isP2 = (playerIdx === 1);
+            const p = isP2 ? player2 : null;
+            if (isP2) {
+                if (!p || p.isReloading) return;
+                p.isReloading = true;
+            } else {
+                if (isReloading) return;
+                isReloading = true;
+            }
+            const suffix = isP2 ? '-2' : '';
+            const reloadIndicator = document.getElementById('reload-indicator' + suffix);
+            if (reloadIndicator) {
+                reloadIndicator.textContent = 'Reloading...';
+                reloadIndicator.classList.add('reloading');
+            }
 
             setTimeout(() => {
-                ammo = maxAmmo;
-                isReloading = false;
-                reloadIndicator.textContent = 'Ready';
-                reloadIndicator.classList.remove('reloading');
-                updateHUD();
+                if (isP2) {
+                    if (!player2) return;
+                    player2.ammo = maxAmmo;
+                    player2.isReloading = false;
+                } else {
+                    ammo = maxAmmo;
+                    isReloading = false;
+                }
+                if (reloadIndicator) {
+                    reloadIndicator.textContent = 'Ready';
+                    reloadIndicator.classList.remove('reloading');
+                }
+                updateHUDFor(playerIdx);
             }, 2000);
         }
         
         function updatePlayer(delta) {
+            // Backward-compatible entry point: updates P1 only.
+            updatePlayerFor(0, delta);
+        }
+
+        function updatePlayerFor(playerIdx, delta) {
             if (!gameStarted || gamePaused) return;
+            if (!isPlayerAlive(playerIdx)) return;
 
-            tempVec1.copy(yawObject.position); // prevPosition
-            
-            // Get movement direction
-            direction.set(0, 0, 0);
-            
-            if (keys['w'] || keys['arrowup']) direction.z -= 1;
-            if (keys['s'] || keys['arrowdown']) direction.z += 1;
-            if (keys['a'] || keys['arrowleft']) direction.x -= 1;
-            if (keys['d'] || keys['arrowright']) direction.x += 1;
-            
-            direction.normalize();
+            const isP2 = (playerIdx === 1);
+            const p = isP2 ? player2 : null;
+            if (isP2 && !p) return;
 
-            if (dashCooldown > 0) {
-                dashCooldown -= delta;
-            }
-            if (dashCooldown < 0) dashCooldown = 0;
+            const myYaw = isP2 ? p.yawObject : yawObject;
+            const myPitchObj = isP2 ? p.pitchObject : pitchObject;
+            const myVelocity = isP2 ? p.velocity : velocity;
+            const myDirection = isP2 ? p.direction : direction;
+            const myWeapon = isP2 ? p.weapon : weapon;
+            const myPlayerModel = isP2 ? p.playerModel : playerModel;
+            const myThirdPerson = isP2 ? p.thirdPerson : thirdPerson;
 
-            if (keys['shift'] && dashCooldown === 0 && direction.length() > 0 && !isDashing) {
-                isDashing = true;
-                dashTime = DASH_DURATION;
-                dashCooldown = DASH_COOLDOWN_TIME;
+            tempVec1.copy(myYaw.position); // prevPosition
 
-                dashVelocity.copy(direction);
-                dashVelocity.applyQuaternion(yawObject.quaternion);
-                dashVelocity.y = 0;
-                dashVelocity.normalize().multiplyScalar(DASH_SPEED);
+            // ===== Movement input =====
+            // Movement for the LOCAL player comes from this client's keyboard. For the REMOTE
+            // player in online 1v1, movement comes from network input applied via netInput.
+            myDirection.set(0, 0, 0);
+            const isLocalUser = (playerIdx === localPlayerIdx());
+            const useNetInput = isOnline1v1 && !isLocalUser; // host: remote=joiner; joiner: doesn't update remote at all in animate
 
-                createHitParticles(yawObject.position, 0x00ffff);
-            }
-
-            if (isDashing) {
-                dashTime -= delta;
-                if (dashTime <= 0) {
-                    isDashing = false;
+            if (useNetInput) {
+                // Host reads buffered input from joiner for player2
+                const inp = lastNetInput;
+                if (inp) {
+                    if (inp.fwd) myDirection.z -= 1;
+                    if (inp.back) myDirection.z += 1;
+                    if (inp.left) myDirection.x -= 1;
+                    if (inp.right) myDirection.x += 1;
+                    // Apply joiner's yaw/pitch authoritatively
+                    if (typeof inp.yaw === 'number' && typeof inp.pitch === 'number') {
+                        if (isP2 && p) {
+                            p.yaw = inp.yaw;
+                            p.pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, inp.pitch));
+                            myYaw.rotation.y = p.yaw;
+                            myPitchObj.rotation.x = p.pitch;
+                        }
+                    }
                 }
+            } else {
+                if (keys['w']) myDirection.z -= 1;
+                if (keys['s']) myDirection.z += 1;
+                if (keys['a']) myDirection.x -= 1;
+                if (keys['d']) myDirection.x += 1;
+                if (keys['arrowup']) myDirection.z -= 1;
+                if (keys['arrowdown']) myDirection.z += 1;
+                if (keys['arrowleft']) myDirection.x -= 1;
+                if (keys['arrowright']) myDirection.x += 1;
+            }
+            myDirection.normalize();
+
+            // ===== Dash =====
+            const myDashCooldownVal = isP2 ? p.dashCooldown : dashCooldown;
+            const myDashingVal = isP2 ? p.isDashing : isDashing;
+            const myDashVel = isP2 ? p.dashVelocity : dashVelocity;
+            let newDashCooldown = myDashCooldownVal;
+            let newDashing = myDashingVal;
+            let newDashTime = isP2 ? p.dashTime : dashTime;
+
+            if (newDashCooldown > 0) newDashCooldown -= delta;
+            if (newDashCooldown < 0) newDashCooldown = 0;
+
+            let dashKeyPressed;
+            if (useNetInput) {
+                dashKeyPressed = !!(lastNetInput && lastNetInput.dash);
+            } else {
+                dashKeyPressed = !!keys['shift'];
+            }
+            if (dashKeyPressed && newDashCooldown === 0 && myDirection.length() > 0 && !newDashing) {
+                newDashing = true;
+                newDashTime = DASH_DURATION;
+                newDashCooldown = DASH_COOLDOWN_TIME;
+
+                myDashVel.copy(myDirection);
+                myDashVel.applyQuaternion(myYaw.quaternion);
+                myDashVel.y = 0;
+                myDashVel.normalize().multiplyScalar(DASH_SPEED);
+
+                createHitParticles(myYaw.position, isP2 ? 0xff66ff : 0x00ffff);
+            }
+
+            if (newDashing) {
+                newDashTime -= delta;
+                if (newDashTime <= 0) newDashing = false;
+            }
+
+            if (isP2) {
+                p.dashCooldown = newDashCooldown;
+                p.isDashing = newDashing;
+                p.dashTime = newDashTime;
+            } else {
+                dashCooldown = newDashCooldown;
+                isDashing = newDashing;
+                dashTime = newDashTime;
             }
 
             const currentSpeed = moveSpeed;
 
-            // Move player relative to camera direction
-            if (isDashing) {
-                yawObject.position.add(dashVelocity.clone().multiplyScalar(delta));
-            } else if (direction.length() > 0) {
-                tempVec2.copy(direction);
-                tempVec2.applyQuaternion(yawObject.quaternion);
+            // ===== Move =====
+            if (newDashing) {
+                myYaw.position.add(myDashVel.clone().multiplyScalar(delta));
+            } else if (myDirection.length() > 0) {
+                tempVec2.copy(myDirection);
+                tempVec2.applyQuaternion(myYaw.quaternion);
                 tempVec2.y = 0;
                 tempVec2.normalize();
-                
-                yawObject.position.add(tempVec2.multiplyScalar(currentSpeed * delta));
+                myYaw.position.add(tempVec2.multiplyScalar(currentSpeed * delta));
             }
-            
-            // Jump
-            if (keys[' '] && canJump) {
-                velocity.y = jumpSpeed;
-                canJump = false;
+
+            // ===== Jump =====
+            let jumpKey;
+            if (useNetInput) jumpKey = !!(lastNetInput && lastNetInput.jump);
+            else jumpKey = !!keys[' '];
+            const myCanJump = isP2 ? p.canJump : canJump;
+            if (jumpKey && myCanJump) {
+                myVelocity.y = jumpSpeed;
+                if (isP2) p.canJump = false; else canJump = false;
             }
-            
-            // Apply gravity
-            velocity.y -= 40 * delta;
-            yawObject.position.y += velocity.y * delta;
-            
-            // Ground check
-            if (yawObject.position.y <= 1.6) {
-                yawObject.position.y = 1.6;
-                velocity.y = 0;
-                canJump = true;
+
+            // ===== Gravity =====
+            myVelocity.y -= 40 * delta;
+            myYaw.position.y += myVelocity.y * delta;
+
+            // ===== Ground check =====
+            if (myYaw.position.y <= 1.6) {
+                myYaw.position.y = 1.6;
+                myVelocity.y = 0;
+                if (isP2) p.canJump = true; else canJump = true;
             }
 
             tempBoxSize.set(1, 3, 1);
-            tempBox.setFromCenterAndSize(yawObject.position, tempBoxSize);
+            tempBox.setFromCenterAndSize(myYaw.position, tempBoxSize);
 
             let collision = false;
             for (const obs of obstacles) {
                 if (obs.userData.boundingBox && obs.userData.boundingBox.intersectsBox(tempBox)) {
                     collision = true;
-                    // Check if player is falling onto the obstacle
-                    if (velocity.y < 0 && tempVec1.y > yawObject.position.y && obs.userData.boundingBox.max.y < tempVec1.y - 1.5) {
-                        yawObject.position.y = obs.userData.boundingBox.max.y + 1.6;
-                        velocity.y = 0;
-                        canJump = true;
-                        collision = false; // Resolved vertically, no horizontal revert
+                    if (myVelocity.y < 0 && tempVec1.y > myYaw.position.y && obs.userData.boundingBox.max.y < tempVec1.y - 1.5) {
+                        myYaw.position.y = obs.userData.boundingBox.max.y + 1.6;
+                        myVelocity.y = 0;
+                        if (isP2) p.canJump = true; else canJump = true;
+                        collision = false;
                     }
                     break;
                 }
             }
 
             if (collision) {
-                // Try sliding on X axis
-                const intendedX = yawObject.position.x;
-                const intendedZ = yawObject.position.z;
+                const intendedX = myYaw.position.x;
+                const intendedZ = myYaw.position.z;
 
-                yawObject.position.x = tempVec1.x; // Revert X
-                tempBox.setFromCenterAndSize(yawObject.position, tempBoxSize);
+                myYaw.position.x = tempVec1.x;
+                tempBox.setFromCenterAndSize(myYaw.position, tempBoxSize);
                 let xCollision = false;
                 for (const obs of obstacles) {
                     if (obs.userData.boundingBox && obs.userData.boundingBox.intersectsBox(tempBox)) {
@@ -1863,49 +3019,50 @@
                 }
 
                 if (xCollision) {
-                    // X-revert wasn't enough, try reverting Z and keeping X
-                    yawObject.position.x = intendedX;
-                    yawObject.position.z = tempVec1.z; // Revert Z
-                    tempBox.setFromCenterAndSize(yawObject.position, tempBoxSize);
+                    myYaw.position.x = intendedX;
+                    myYaw.position.z = tempVec1.z;
+                    tempBox.setFromCenterAndSize(myYaw.position, tempBoxSize);
                     let zCollision = false;
                     for (const obs of obstacles) {
                         if (obs.userData.boundingBox && obs.userData.boundingBox.intersectsBox(tempBox)) {
                             zCollision = true; break;
                         }
                     }
-
                     if (zCollision) {
-                        // Sliding failed, revert fully
-                        yawObject.position.copy(tempVec1);
+                        myYaw.position.copy(tempVec1);
                     }
                 }
             }
 
-            yawObject.position.x = Math.max(-49, Math.min(49, yawObject.position.x));
-            yawObject.position.z = Math.max(-49, Math.min(49, yawObject.position.z));
-            
-            // Weapon sway
-            if (weapon) {
-                weapon.visible = !thirdPerson;
-                if (!thirdPerson) {
-                    weapon.position.x = weaponOffset.x + Math.sin(clock.elapsedTime * 2) * 0.01;
-                    weapon.position.y = weaponOffset.y + Math.sin(clock.elapsedTime * 4) * 0.005;
+            myYaw.position.x = Math.max(-49, Math.min(49, myYaw.position.x));
+            myYaw.position.z = Math.max(-49, Math.min(49, myYaw.position.z));
 
-                    // Apply recoil
-                    weapon.position.z = weaponOffset.z + weaponRecoil;
-                    weapon.rotation.x = weaponRecoil * 0.5;
-                    weaponRecoil *= 0.9;
+            // Weapon sway (visibility is managed per-render in setPerPlayerVisibility for 1v1)
+            const myRecoil = isP2 ? p.weaponRecoil : weaponRecoil;
+            if (myWeapon) {
+                if (!is1v1) {
+                    myWeapon.visible = !myThirdPerson;
+                }
+                if (!myThirdPerson) {
+                    myWeapon.position.x = weaponOffset.x + Math.sin(clock.elapsedTime * 2) * 0.01;
+                    myWeapon.position.y = weaponOffset.y + Math.sin(clock.elapsedTime * 4) * 0.005;
+                    myWeapon.position.z = weaponOffset.z + myRecoil;
+                    myWeapon.rotation.x = myRecoil * 0.5;
+                    const newRecoil = myRecoil * 0.9;
+                    if (isP2) p.weaponRecoil = newRecoil; else weaponRecoil = newRecoil;
                 }
             }
 
-            if (playerModel) {
-                playerModel.visible = thirdPerson;
-                playerModel.position.set(
-                    yawObject.position.x,
-                    yawObject.position.y - 1.6,
-                    yawObject.position.z
+            if (myPlayerModel) {
+                if (!is1v1) {
+                    myPlayerModel.visible = myThirdPerson;
+                }
+                myPlayerModel.position.set(
+                    myYaw.position.x,
+                    myYaw.position.y - 1.6,
+                    myYaw.position.z
                 );
-                playerModel.rotation.y = yaw;
+                myPlayerModel.rotation.y = isP2 ? p.yaw : yaw;
             }
         }
         
@@ -1916,18 +3073,44 @@
 
             for (let i = enemies.length - 1; i >= 0; i--) {
                 const enemy = enemies[i];
-                tempVec1.subVectors(yawObject.position, enemy.position);
-                tempVec2.set(tempVec1.x, 0, tempVec1.z); // planarToPlayer
+
+                // Periodic 50/50 target reassessment
+                enemy.userData.targetReassessTimer = (enemy.userData.targetReassessTimer || 0) - delta;
+                if (enemy.userData.targetReassessTimer <= 0) {
+                    const newTarget = pickTargetForEnemy(enemy);
+                    if (newTarget != null && newTarget !== enemy.userData.targetPlayer) {
+                        assignEnemyTarget(enemy, newTarget);
+                    }
+                    enemy.userData.targetReassessTimer = 2.5 + Math.random();
+                }
+
+                // Validate target still alive; if not, re-pick
+                if (enemy.userData.targetPlayer == null || !isPlayerAlive(enemy.userData.targetPlayer)) {
+                    const newTarget = pickTargetForEnemy(enemy);
+                    if (newTarget == null) {
+                        // No live players to target — skip movement; bots idle
+                        continue;
+                    }
+                    if (enemy.userData.targetPlayer != null) decTargetedCount(enemy.userData.targetPlayer);
+                    enemy.userData.targetPlayer = newTarget;
+                    incTargetedCount(newTarget);
+                }
+
+                const targetIdx = enemy.userData.targetPlayer;
+                const targetPos = getPlayerPosition(targetIdx);
+
+                tempVec1.subVectors(targetPos, enemy.position);
+                tempVec2.set(tempVec1.x, 0, tempVec1.z); // planarToTarget
                 let moveDirection = null;
 
                 if (tempVec2.lengthSq() > 0.000001) {
-                    if (hasLineOfSight(enemy.position, yawObject.position)) {
+                    if (hasLineOfSight(enemy.position, targetPos)) {
                         enemy.userData.path = [];
                         enemy.userData.pathTargetKey = null;
                         enemy.userData.pathRecalcTimer = 0.2;
                         moveDirection = tempVec2.clone().normalize();
                     } else {
-                        const pathDirection = getPathDirectionForEnemy(enemy, delta);
+                        const pathDirection = getPathDirectionForEnemy(enemy, delta, targetPos);
                         if (pathDirection) {
                             moveDirection = pathDirection;
                         } else {
@@ -1993,7 +3176,7 @@
                 enemy.position.x = Math.max(-48, Math.min(48, enemy.position.x));
                 enemy.position.z = Math.max(-48, Math.min(48, enemy.position.z));
 
-                enemy.lookAt(yawObject.position.x, enemy.position.y, yawObject.position.z);
+                enemy.lookAt(targetPos.x, enemy.position.y, targetPos.z);
 
                 const healthPercent = enemy.userData.health / enemy.userData.maxHealth;
                 enemy.material.emissiveIntensity = 0.35 + (1 - healthPercent) * 0.45;
@@ -2006,37 +3189,39 @@
                     enemy.userData.hitGlow.intensity = 0.6 + (1 - healthPercent) * 0.8;
                 }
 
-                tempVec1.subVectors(yawObject.position, enemy.position);
+                tempVec1.subVectors(targetPos, enemy.position);
                 tempVec1.y = 0;
-                const distanceToPlayer = tempVec1.length();
+                const distanceToTarget = tempVec1.length();
                 let approachDirection = null;
-                if (distanceToPlayer > 0.000001) {
+                if (distanceToTarget > 0.000001) {
                     approachDirection = tempVec1.clone().normalize();
                 }
 
                 if (enemy.userData.isArmed &&
                     currentTime - enemy.userData.lastShotTime > enemy.userData.shootCooldown) {
-                    const rangedDistance = enemy.position.distanceTo(yawObject.position);
-                    if (rangedDistance < 35) {
+                    if (distanceToTarget < 35) {
                         enemyShoot(enemy);
                     }
                 }
 
-                if (distanceToPlayer < 1.2 && approachDirection) {
+                if (distanceToTarget < 1.2 && approachDirection) {
                     enemy.position.addScaledVector(approachDirection, -0.5);
                 }
 
-                if (distanceToPlayer < 2.4) {
-                    if (!shieldActive) {
-                        const damageRate = enemy.userData.isArmed ? 32 : 24;
-                        health -= damageRate * delta;
-                        lastDamageTime = currentTime;
-                        showDamageOverlay();
-                        screenShake = 0.1;
-                        updateHUD();
+                // Contact damage applies to whichever live player is closest (physical interaction)
+                const aliveIdx = getAliveActivePlayerIndices();
+                let closestIdx = -1;
+                let closestDist = Infinity;
+                for (const pi of aliveIdx) {
+                    const d = enemy.position.distanceTo(getPlayerPosition(pi));
+                    if (d < closestDist) { closestDist = d; closestIdx = pi; }
+                }
 
-                        if (health <= 0) {
-                            gameOver();
+                if (closestIdx !== -1 && closestDist < 2.4) {
+                    const damageRate = enemy.userData.isArmed ? 32 : 24;
+                    if (applyDamageToPlayer(closestIdx, damageRate * delta, false, null)) {
+                        // Player died — bail out of further damage this frame for this enemy
+                        if (!is1v1 && !p1Alive) {
                             return;
                         }
                     }
@@ -2053,29 +3238,47 @@
             if (enemy.userData.hitGlow) {
                 enemy.remove(enemy.userData.hitGlow);
             }
+            // Release targeting slot
+            if (enemy.userData.targetPlayer != null) {
+                decTargetedCount(enemy.userData.targetPlayer);
+            }
             scene.remove(enemy);
             enemies.splice(index, 1);
 
-            kills++;
+            // Credit the player who killed it (defaults to P1 if unattributed)
+            const killerIdx = (enemy.userData.lastHitByPlayer != null) ? enemy.userData.lastHitByPlayer : 0;
             enemiesRemainingInWave = Math.max(0, enemiesRemainingInWave - 1);
 
-            // Handle Combo
-            if (comboTimeLeft > 0) {
-                comboMultiplier = Math.min(10, comboMultiplier + 1);
+            const isP2 = (killerIdx === 1);
+            const p = isP2 ? player2 : null;
+
+            // Combo
+            if (isP2) {
+                if (p.comboTimeLeft > 0) p.comboMultiplier = Math.min(10, p.comboMultiplier + 1);
+                else p.comboMultiplier = 1;
+                p.comboTimeLeft = COMBO_DURATION;
+                p.kills++;
+                p.score += (100 + wave * 25) * p.comboMultiplier;
             } else {
-                comboMultiplier = 1;
+                if (comboTimeLeft > 0) comboMultiplier = Math.min(10, comboMultiplier + 1);
+                else comboMultiplier = 1;
+                comboTimeLeft = COMBO_DURATION;
+                kills++;
+                score += (100 + wave * 25) * comboMultiplier;
             }
-            comboTimeLeft = COMBO_DURATION;
 
-            score += (100 + wave * 25) * comboMultiplier;
-            updateHUD();
+            updateHUDFor(killerIdx);
 
-            if (kills === 15) {
+            // Difficulty banner trigger uses total combined kills milestone
+            const totalKills = kills + (player2 ? player2.kills : 0);
+            if (totalKills === 15) {
                 const indicator = document.getElementById('difficulty-indicator');
-                indicator.style.display = 'block';
-                setTimeout(() => {
-                    indicator.style.display = 'none';
-                }, 3000);
+                if (indicator) {
+                    indicator.style.display = 'block';
+                    setTimeout(() => {
+                        indicator.style.display = 'none';
+                    }, 3000);
+                }
             }
 
             if (Math.random() < 0.18) {
@@ -2103,8 +3306,8 @@
 
         function updateBullets(delta) {
             if (!gameStarted || gamePaused) return;
-            
-            // Update player bullets
+
+            // ===== Player bullets =====
             for (let i = bullets.length - 1; i >= 0; i--) {
                 const bullet = bullets[i];
 
@@ -2112,6 +3315,9 @@
                 bullet.position.y += bullet.userData.velocity.y * delta;
                 bullet.position.z += bullet.userData.velocity.z * delta;
 
+                const shooterIdx = bullet.userData.shooterIndex != null ? bullet.userData.shooterIndex : 0;
+
+                // Enemy hit check
                 if (!bullet.userData.hasHit) {
                     for (let j = 0; j < enemies.length; j++) {
                         const enemy = enemies[j];
@@ -2119,23 +3325,47 @@
 
                         if (distance < 1.5) {
                             bullet.userData.hasHit = true;
-
-                            // Headshot detection (rough approximation based on height relative to enemy center)
                             const isHeadshot = (bullet.position.y - enemy.position.y) > 0.6;
-
                             const damage = isHeadshot ? 100 : 50;
                             enemy.userData.health -= damage;
+                            enemy.userData.lastHitByPlayer = shooterIdx;
 
-                            if (isHeadshot) {
-                                showHitIndicator(true);
-                            } else {
-                                showHitIndicator();
-                            }
+                            showHitIndicatorFor(shooterIdx, isHeadshot);
 
                             createHitParticles(bullet.position, isHeadshot ? 0xffea00 : 0xff0000);
                             releaseBullet(bullet);
                             bullets.splice(i, 1);
                             break;
+                        }
+                    }
+                }
+
+                // PvP hit check (1v1 only): hit the OTHER player
+                if (bullets[i] && !bullet.userData.hasHit && is1v1) {
+                    const otherIdx = 1 - shooterIdx;
+                    if (isPlayerAlive(otherIdx)) {
+                        const otherPos = getPlayerPosition(otherIdx);
+                        const d = bullet.position.distanceTo(otherPos);
+                        if (d < 1.5) {
+                            bullet.userData.hasHit = true;
+                            const isHeadshot = (bullet.position.y - otherPos.y) > 0.4;
+                            const dmg = isHeadshot ? 50 : 25;
+                            showHitIndicatorFor(shooterIdx, isHeadshot);
+                            const killed = applyDamageToPlayer(otherIdx, dmg, true, shooterIdx);
+                            if (killed) {
+                                // Credit PvP kill
+                                if (shooterIdx === 0) {
+                                    kills++;
+                                    score += 500;
+                                } else if (player2) {
+                                    player2.kills++;
+                                    player2.score += 500;
+                                }
+                                updateHUDFor(shooterIdx);
+                            }
+                            createHitParticles(bullet.position, isHeadshot ? 0xffea00 : 0xff0000);
+                            releaseBullet(bullet);
+                            bullets.splice(i, 1);
                         }
                     }
                 }
@@ -2160,8 +3390,8 @@
                     }
                 }
             }
-            
-            // Update enemy bullets
+
+            // ===== Enemy bullets =====
             for (let i = enemyBullets.length - 1; i >= 0; i--) {
                 const bullet = enemyBullets[i];
 
@@ -2170,25 +3400,28 @@
                 bullet.position.z += bullet.userData.velocity.z * delta;
 
                 if (!bullet.userData.hasHit) {
-                    const distance = bullet.position.distanceTo(yawObject.position);
-
-                    if (distance < 1.5) {
-                        bullet.userData.hasHit = true;
-                        if (!shieldActive) {
-                            health -= 10;
-                            lastDamageTime = Date.now();
-                            showDamageOverlay();
-                            screenShake = 0.15;
-                            updateHUD();
-
-                            if (health <= 0) {
-                                gameOver();
-                            }
+                    // Primary target check
+                    const tIdx = bullet.userData.targetPlayer != null ? bullet.userData.targetPlayer : 0;
+                    let hitIdx = -1;
+                    if (isPlayerAlive(tIdx)) {
+                        const d = bullet.position.distanceTo(getPlayerPosition(tIdx));
+                        if (d < 1.5) hitIdx = tIdx;
+                    }
+                    // Opportunistic check on the other player (1v1 only, slightly smaller radius)
+                    if (hitIdx === -1 && is1v1) {
+                        const oIdx = 1 - tIdx;
+                        if (isPlayerAlive(oIdx)) {
+                            const d = bullet.position.distanceTo(getPlayerPosition(oIdx));
+                            if (d < 1.2) hitIdx = oIdx;
                         }
+                    }
+
+                    if (hitIdx !== -1) {
+                        bullet.userData.hasHit = true;
+                        applyDamageToPlayer(hitIdx, 10, true, null);
                         createHitParticles(bullet.position, 0x00ff88);
                         releaseEnemyBullet(bullet);
                         enemyBullets.splice(i, 1);
-
                         continue;
                     }
                 }
@@ -2241,61 +3474,95 @@
         }
         
         function updateHUD() {
-            const clampedHealth = Math.max(0, Math.min(maxHealth, health));
-            const healthPercent = clampedHealth / maxHealth;
-            document.getElementById('health-bar').style.width = `${healthPercent * 100}%`;
-            document.getElementById('health-text').textContent = `${Math.floor(clampedHealth)}/${maxHealth}`;
-
-            const ammoPercent = Math.max(0, Math.min(1, ammo / maxAmmo));
-            document.getElementById('ammo-bar').style.width = `${ammoPercent * 100}%`;
-            document.getElementById('ammo-text').textContent = `${ammo}/${maxAmmo}`;
-
-            document.getElementById('score-value').textContent = score;
-            document.getElementById('kills').textContent = kills;
+            updateHUDFor(0);
+            if (is1v1) updateHUDFor(1);
             document.getElementById('wave-value').textContent = wave;
+        }
 
-            const fireRateLevel = getFireRateLevel();
-            document.getElementById('fire-rate-label').textContent = `Level ${fireRateLevel}`;
+        function updateHUDFor(playerIdx) {
+            const isP2 = (playerIdx === 1);
+            if (isP2 && !player2) return;
+            // Route to local HUD ("" suffix) for the local player; opponent HUD ("-2") for remote.
+            // In classic, idx=0 is always local → "". In online 1v1, joiner's local is idx=1.
+            const suffix = (playerIdx === localPlayerIdx()) ? '' : '-2';
+            const p = isP2 ? player2 : null;
 
-            document.getElementById('fire-rate-stat').textContent = fireRateShotsPerSecond[fireRateLevel - 1];
+            const myHealth = isP2 ? p.health : health;
+            const myAmmo = isP2 ? p.ammo : ammo;
+            const myKills = isP2 ? p.kills : kills;
+            const myScore = isP2 ? p.score : score;
+            const myDashCooldown = isP2 ? p.dashCooldown : dashCooldown;
+            const myComboTimeLeft = isP2 ? p.comboTimeLeft : comboTimeLeft;
+            const myComboMult = isP2 ? p.comboMultiplier : comboMultiplier;
 
-            rapidFireEnabled = kills >= 25 || wave >= 4;
-            const rapidFireLabel = document.getElementById('rapid-fire-label');
-            rapidFireLabel.textContent = rapidFireEnabled ? 'Online' : 'Offline';
-            rapidFireLabel.classList.toggle('active', rapidFireEnabled);
+            const clampedHealth = Math.max(0, Math.min(maxHealth, myHealth));
+            const healthPercent = clampedHealth / maxHealth;
+            const hb = document.getElementById('health-bar' + suffix);
+            const ht = document.getElementById('health-text' + suffix);
+            if (hb) hb.style.width = `${healthPercent * 100}%`;
+            if (ht) ht.textContent = `${Math.floor(clampedHealth)}/${maxHealth}`;
 
-            // Dash Update
-            const dashPercent = Math.max(0, Math.min(1, 1 - (dashCooldown / DASH_COOLDOWN_TIME)));
-            document.getElementById('dash-bar-fill').style.width = `${dashPercent * 100}%`;
-            document.getElementById('dash-text').textContent = dashPercent >= 1 ? 'Ready' : 'Recharging...';
+            const ammoPercent = Math.max(0, Math.min(1, myAmmo / maxAmmo));
+            const ab = document.getElementById('ammo-bar' + suffix);
+            const at = document.getElementById('ammo-text' + suffix);
+            if (ab) ab.style.width = `${ammoPercent * 100}%`;
+            if (at) at.textContent = `${myAmmo}/${maxAmmo}`;
 
-            // Combo Update
-            if (comboTimeLeft > 0) {
-                document.getElementById('combo-container').style.opacity = '1';
-                document.getElementById('combo-text').textContent = `Combo x${comboMultiplier}`;
-                const comboPercent = Math.max(0, Math.min(1, comboTimeLeft / COMBO_DURATION));
-                document.getElementById('combo-bar-fill').style.transform = `scaleX(${comboPercent})`;
-            } else {
-                document.getElementById('combo-container').style.opacity = '0';
+            const sv = document.getElementById('score-value' + suffix);
+            const kv = document.getElementById('kills' + suffix);
+            if (sv) sv.textContent = myScore;
+            if (kv) kv.textContent = myKills;
+
+            const fireRateLevel = getFireRateLevel(myKills, wave);
+            const frl = document.getElementById('fire-rate-label' + suffix);
+            const frs = document.getElementById('fire-rate-stat' + suffix);
+            if (frl) frl.textContent = `Level ${fireRateLevel}`;
+            if (frs) frs.textContent = fireRateShotsPerSecond[fireRateLevel - 1];
+
+            const myRapidFire = myKills >= 25 || wave >= 4;
+            if (isP2) p.rapidFireEnabled = myRapidFire; else rapidFireEnabled = myRapidFire;
+            const rfl = document.getElementById('rapid-fire-label' + suffix);
+            if (rfl) {
+                rfl.textContent = myRapidFire ? 'Online' : 'Offline';
+                rfl.classList.toggle('active', myRapidFire);
+            }
+
+            const dashPercent = Math.max(0, Math.min(1, 1 - (myDashCooldown / DASH_COOLDOWN_TIME)));
+            const dbf = document.getElementById('dash-bar-fill' + suffix);
+            const dt = document.getElementById('dash-text' + suffix);
+            if (dbf) dbf.style.width = `${dashPercent * 100}%`;
+            if (dt) dt.textContent = dashPercent >= 1 ? 'Ready' : 'Recharging...';
+
+            const comboContainer = document.getElementById('combo-container' + suffix);
+            const comboText = document.getElementById('combo-text' + suffix);
+            const comboBarFill = document.getElementById('combo-bar-fill' + suffix);
+            if (comboContainer) {
+                if (myComboTimeLeft > 0) {
+                    comboContainer.style.opacity = '1';
+                    if (comboText) comboText.textContent = `Combo x${myComboMult}`;
+                    const comboPercent = Math.max(0, Math.min(1, myComboTimeLeft / COMBO_DURATION));
+                    if (comboBarFill) comboBarFill.style.transform = `scaleX(${comboPercent})`;
+                } else {
+                    comboContainer.style.opacity = '0';
+                }
             }
         }
 
         function gameOver() {
-            gameStarted = false;
-            gamePaused = true;
-            document.exitPointerLock();
-
-            const pauseMenu = document.getElementById('pause-menu');
-            pauseMenu.innerHTML = `
-                <h2 style="color: #ff3333; text-shadow: 0 0 15px rgba(255, 50, 50, 0.8);">SYSTEM FAILURE</h2>
-                <p>Wave Reached: <span style="color: #00ffd5">${wave}</span></p>
-                <p>Kills: <span style="color: #00ffd5">${kills}</span></p>
-                <p>Score: <span style="color: #00ffd5">${score}</span></p>
-                <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: rgba(255, 50, 50, 0.2); color: #ff3333; border: 1px solid #ff3333; cursor: pointer; text-transform: uppercase; font-family: inherit;">Reboot System</button>
-            `;
-            pauseMenu.style.display = 'block';
-            pauseMenu.style.borderColor = 'rgba(255, 50, 50, 0.5)';
-            pauseMenu.style.boxShadow = '0 0 30px rgba(255, 0, 0, 0.3)';
+            // Legacy entry point used by classic-mode-only call sites (e.g., reload-empty edge cases).
+            // Marks P1 as dead so downstream logic stays consistent.
+            if (p1Alive) {
+                p1Alive = false;
+                if (weapon) weapon.visible = false;
+                if (playerModel) playerModel.visible = false;
+            }
+            if (!is1v1) {
+                gameOverClassic();
+            } else {
+                const alive = getAliveActivePlayerIndices();
+                if (alive.length === 1) endMatch1v1(alive[0], false);
+                else endMatch1v1(null, true);
+            }
         }
         
         function togglePause() {
@@ -2315,59 +3582,110 @@
 
         function updateShooting() {
             if (!gameStarted || gamePaused) return;
-            if (isMouseDown && rapidFireEnabled) {
-                shoot();
+            // Host only: P1 mouse-held auto-fire (P1 is host's local player)
+            if (!isOnline1v1 || iAmHost) {
+                if (p1Alive && isMouseDown && rapidFireEnabled) {
+                    shoot(0);
+                }
+            }
+            // Host: P2 rapid-fire driven by joiner's input.isFiring
+            if (isOnline1v1 && iAmHost && p2Alive && player2 && player2.rapidFireEnabled) {
+                if (lastNetInput && lastNetInput.isFiring) {
+                    shoot(1);
+                }
             }
         }
 
-        function togglePerspective() {
-            thirdPerson = !thirdPerson;
-            cameraOffsetTarget.copy(thirdPerson ? thirdPersonCameraOffset : firstPersonCameraOffset);
-            if (!thirdPerson) {
-                cameraCurrentOffset.copy(firstPersonCameraOffset);
+        function togglePerspective(playerIdx) {
+            if (playerIdx === undefined) playerIdx = 0;
+            const isP2 = (playerIdx === 1);
+            if (isP2) {
+                if (!player2) return;
+                player2.thirdPerson = !player2.thirdPerson;
+                player2.cameraOffsetTarget.copy(player2.thirdPerson ? thirdPersonCameraOffset : firstPersonCameraOffset);
+                if (!player2.thirdPerson) {
+                    player2.cameraCurrentOffset.copy(firstPersonCameraOffset);
+                }
+            } else {
+                thirdPerson = !thirdPerson;
+                cameraOffsetTarget.copy(thirdPerson ? thirdPersonCameraOffset : firstPersonCameraOffset);
+                if (!thirdPerson) {
+                    cameraCurrentOffset.copy(firstPersonCameraOffset);
+                }
             }
-            updateModeIndicator();
+            updateModeIndicatorFor(playerIdx);
         }
 
         function updateModeIndicator() {
-            const indicator = document.getElementById('mode-indicator');
-            indicator.textContent = thirdPerson ? 'Third Person' : 'First Person';
+            updateModeIndicatorFor(0);
+        }
+
+        function updateModeIndicatorFor(playerIdx) {
+            const isP2 = (playerIdx === 1);
+            const suffix = isP2 ? '-2' : '';
+            const tp = isP2 ? (player2 && player2.thirdPerson) : thirdPerson;
+            const indicator = document.getElementById('mode-indicator' + suffix);
+            if (!indicator) return;
+            indicator.textContent = tp ? 'Third Person' : 'First Person';
             indicator.style.opacity = '1';
-            if (modeIndicatorTimeout) {
-                clearTimeout(modeIndicatorTimeout);
+            if (isP2) {
+                if (modeIndicatorTimeout2) clearTimeout(modeIndicatorTimeout2);
+                modeIndicatorTimeout2 = setTimeout(() => {
+                    indicator.style.opacity = tp ? '0.9' : '0.6';
+                }, 1500);
+            } else {
+                if (modeIndicatorTimeout) clearTimeout(modeIndicatorTimeout);
+                modeIndicatorTimeout = setTimeout(() => {
+                    indicator.style.opacity = tp ? '0.9' : '0.6';
+                }, 1500);
             }
-            modeIndicatorTimeout = setTimeout(() => {
-                indicator.style.opacity = thirdPerson ? '0.9' : '0.6';
-            }, 1500);
         }
 
         function updateCameraPerspective(delta) {
-            const lerpSpeed = thirdPerson ? 5 : 10;
-            cameraOffsetTarget.copy(thirdPerson ? thirdPersonCameraOffset : firstPersonCameraOffset);
-            cameraCurrentOffset.lerp(cameraOffsetTarget, Math.min(1, delta * lerpSpeed));
-            camera.position.copy(cameraCurrentOffset);
+            updateCameraPerspectiveFor(0, delta);
+            if (is1v1 && player2) updateCameraPerspectiveFor(1, delta);
+        }
 
-            if (screenShake > 0) {
-                const shakeIntensity = screenShake * 2.0;
-                camera.position.x += (Math.random() - 0.5) * shakeIntensity;
-                camera.position.y += (Math.random() - 0.5) * shakeIntensity;
-                camera.position.z += (Math.random() - 0.5) * shakeIntensity;
-                screenShake -= delta;
-                if (screenShake < 0) screenShake = 0;
+        function updateCameraPerspectiveFor(playerIdx, delta) {
+            const isP2 = (playerIdx === 1);
+            const p = isP2 ? player2 : null;
+            const myTP = isP2 ? p.thirdPerson : thirdPerson;
+            const myCamera = isP2 ? p.camera : camera;
+            const myTarget = isP2 ? p.cameraOffsetTarget : cameraOffsetTarget;
+            const myCurrent = isP2 ? p.cameraCurrentOffset : cameraCurrentOffset;
+
+            const lerpSpeed = myTP ? 5 : 10;
+            myTarget.copy(myTP ? thirdPersonCameraOffset : firstPersonCameraOffset);
+            myCurrent.lerp(myTarget, Math.min(1, delta * lerpSpeed));
+            myCamera.position.copy(myCurrent);
+
+            const shake = isP2 ? p.screenShake : screenShake;
+            if (shake > 0) {
+                const shakeIntensity = shake * 2.0;
+                myCamera.position.x += (Math.random() - 0.5) * shakeIntensity;
+                myCamera.position.y += (Math.random() - 0.5) * shakeIntensity;
+                myCamera.position.z += (Math.random() - 0.5) * shakeIntensity;
+                const newShake = Math.max(0, shake - delta);
+                if (isP2) p.screenShake = newShake; else screenShake = newShake;
             }
 
-            if (thirdPerson) {
-                camera.position.y = Math.max(camera.position.y, 0.2);
+            if (myTP) {
+                myCamera.position.y = Math.max(myCamera.position.y, 0.2);
             }
         }
 
         function handleHealthRegen(delta) {
             if (!gameStarted || gamePaused) return;
-            if (health >= maxHealth) return;
             const now = Date.now();
-            if (now - lastDamageTime > healthRegenDelay) {
-                health = Math.min(maxHealth, health + healthRegenRate * delta);
-                updateHUD();
+            for (const idx of getActivePlayerIndices()) {
+                if (!isPlayerAlive(idx)) continue;
+                const curHp = getPlayerHealth(idx);
+                if (curHp >= maxHealth) continue;
+                const lastDmg = idx === 0 ? lastDamageTime : (player2 ? player2.lastDamageTime : 0);
+                if (now - lastDmg > healthRegenDelay) {
+                    setPlayerHealth(idx, Math.min(maxHealth, curHp + healthRegenRate * delta));
+                    updateHUDFor(idx);
+                }
             }
         }
 
@@ -2433,6 +3751,7 @@
             powerup.userData.baseY = powerup.position.y;
             powerup.userData.floatOffset = Math.random() * Math.PI * 2;
             powerup.userData.rotationSpeed = 2 + Math.random();
+            powerup.userData.netId = nextEntityId++;
 
             powerups.push(powerup);
             scene.add(powerup);
@@ -2481,6 +3800,7 @@
             medkit.userData.baseY = medkit.position.y;
             medkit.userData.floatOffset = Math.random() * Math.PI * 2;
             medkit.userData.rotationSpeed = 1 + Math.random() * 0.5;
+            medkit.userData.netId = nextEntityId++;
 
             medkits.push(medkit);
             scene.add(medkit);
@@ -2496,71 +3816,114 @@
                 spawnMedkit();
             }
 
+            const aliveIdx = getAliveActivePlayerIndices();
+
+            // ===== Medkit pickup =====
             for (let i = medkits.length - 1; i >= 0; i--) {
                 const medkit = medkits[i];
                 medkit.rotation.y += medkit.userData.rotationSpeed * delta;
                 medkit.position.y = medkit.userData.baseY + Math.sin(now * 0.002 + medkit.userData.floatOffset) * 0.15;
 
-                const dx = medkit.position.x - yawObject.position.x;
-                const dz = medkit.position.z - yawObject.position.z;
-                if (Math.hypot(dx, dz) < 1.6) {
-                    health = Math.min(maxHealth, health + medkitHealAmount);
-                    score += 25;
+                let pickerIdx = -1;
+                for (const pi of aliveIdx) {
+                    const pPos = getPlayerPosition(pi);
+                    const dx = medkit.position.x - pPos.x;
+                    const dz = medkit.position.z - pPos.z;
+                    if (Math.hypot(dx, dz) < 1.6) { pickerIdx = pi; break; }
+                }
+                if (pickerIdx !== -1) {
+                    if (pickerIdx === 0) {
+                        health = Math.min(maxHealth, health + medkitHealAmount);
+                        score += 25;
+                    } else if (player2) {
+                        player2.health = Math.min(maxHealth, player2.health + medkitHealAmount);
+                        player2.score += 25;
+                    }
                     showMedkitAlert(`+${medkitHealAmount} Health`);
                     scene.remove(medkit);
-                    if (medkit.userData.light) {
-                        medkit.remove(medkit.userData.light);
-                    }
+                    if (medkit.userData.light) medkit.remove(medkit.userData.light);
                     medkits.splice(i, 1);
-                    updateHUD();
+                    updateHUDFor(pickerIdx);
                 }
             }
 
+            // ===== Powerup pickup =====
             for (let i = powerups.length - 1; i >= 0; i--) {
                 const powerup = powerups[i];
                 powerup.rotation.y += powerup.userData.rotationSpeed * delta;
                 powerup.rotation.x += powerup.userData.rotationSpeed * delta * 0.5;
                 powerup.position.y = powerup.userData.baseY + Math.sin(now * 0.003 + powerup.userData.floatOffset) * 0.2;
 
-                const dx = powerup.position.x - yawObject.position.x;
-                const dz = powerup.position.z - yawObject.position.z;
-                if (Math.hypot(dx, dz) < 1.6) {
-                    score += 50;
+                let pickerIdx = -1;
+                for (const pi of aliveIdx) {
+                    const pPos = getPlayerPosition(pi);
+                    const dx = powerup.position.x - pPos.x;
+                    const dz = powerup.position.z - pPos.z;
+                    if (Math.hypot(dx, dz) < 1.6) { pickerIdx = pi; break; }
+                }
+                if (pickerIdx !== -1) {
+                    const suffix = pickerIdx === 1 ? '-2' : '';
+                    if (pickerIdx === 0) score += 50;
+                    else if (player2) player2.score += 50;
+
                     if (powerup.userData.type === 'shield') {
-                        shieldActive = true;
-                        shieldTimeLeft = 10.0;
-                        document.getElementById('shield-indicator').style.display = 'block';
+                        if (pickerIdx === 0) { shieldActive = true; shieldTimeLeft = 10.0; }
+                        else if (player2) { player2.shieldActive = true; player2.shieldTimeLeft = 10.0; }
+                        const el = document.getElementById('shield-indicator' + suffix);
+                        if (el) el.style.display = 'block';
                         showMedkitAlert('SHIELD ACTIVE');
                     } else if (powerup.userData.type === 'overdrive') {
-                        overdriveActive = true;
-                        overdriveTimeLeft = 8.0;
-                        document.getElementById('overdrive-indicator').style.display = 'block';
+                        if (pickerIdx === 0) { overdriveActive = true; overdriveTimeLeft = 8.0; }
+                        else if (player2) { player2.overdriveActive = true; player2.overdriveTimeLeft = 8.0; }
+                        const el = document.getElementById('overdrive-indicator' + suffix);
+                        if (el) el.style.display = 'block';
                         showMedkitAlert('OVERDRIVE ENGAGED');
                     }
 
                     scene.remove(powerup);
-                    if (powerup.userData.light) {
-                        powerup.remove(powerup.userData.light);
-                    }
+                    if (powerup.userData.light) powerup.remove(powerup.userData.light);
                     powerups.splice(i, 1);
-                    updateHUD();
+                    updateHUDFor(pickerIdx);
                 }
             }
 
-            // Update powerup durations
+            // ===== Powerup duration ticks =====
+            // P1
             if (shieldTimeLeft > 0) {
                 shieldTimeLeft -= delta;
                 if (shieldTimeLeft <= 0) {
                     shieldActive = false;
-                    document.getElementById('shield-indicator').style.display = 'none';
+                    const el = document.getElementById('shield-indicator');
+                    if (el) el.style.display = 'none';
                 }
             }
             if (overdriveTimeLeft > 0) {
                 overdriveTimeLeft -= delta;
                 if (overdriveTimeLeft <= 0) {
                     overdriveActive = false;
-                    document.getElementById('overdrive-indicator').style.display = 'none';
-                    updateHUD();
+                    const el = document.getElementById('overdrive-indicator');
+                    if (el) el.style.display = 'none';
+                    updateHUDFor(0);
+                }
+            }
+            // P2
+            if (player2) {
+                if (player2.shieldTimeLeft > 0) {
+                    player2.shieldTimeLeft -= delta;
+                    if (player2.shieldTimeLeft <= 0) {
+                        player2.shieldActive = false;
+                        const el = document.getElementById('shield-indicator-2');
+                        if (el) el.style.display = 'none';
+                    }
+                }
+                if (player2.overdriveTimeLeft > 0) {
+                    player2.overdriveTimeLeft -= delta;
+                    if (player2.overdriveTimeLeft <= 0) {
+                        player2.overdriveActive = false;
+                        const el = document.getElementById('overdrive-indicator-2');
+                        if (el) el.style.display = 'none';
+                        updateHUDFor(1);
+                    }
                 }
             }
         }
@@ -2591,10 +3954,18 @@
 
         function getSpawnPosition(minDistance = 8) {
             const candidate = new THREE.Vector3();
-            const playerPosition = new THREE.Vector3(yawObject.position.x, 0, yawObject.position.z);
+            const playerPositions = [];
+            for (const idx of getActivePlayerIndices()) {
+                const pos = getPlayerPosition(idx);
+                playerPositions.push(new THREE.Vector3(pos.x, 0, pos.z));
+            }
             for (let attempts = 0; attempts < 50; attempts++) {
                 candidate.set((Math.random() - 0.5) * 90, 0, (Math.random() - 0.5) * 90);
-                if (candidate.distanceTo(playerPosition) < minDistance) continue;
+                let tooClose = false;
+                for (const pp of playerPositions) {
+                    if (candidate.distanceTo(pp) < minDistance) { tooClose = true; break; }
+                }
+                if (tooClose) continue;
 
                 let blocked = false;
                 for (const obs of obstacles) {
@@ -2610,7 +3981,8 @@
                     return candidate.clone();
                 }
             }
-            // Fallback: return position far from player even if near obstacle
+            // Fallback: position far from P1
+            const playerPosition = playerPositions[0] || new THREE.Vector3();
             const angle = Math.random() * Math.PI * 2;
             const distance = minDistance + Math.random() * 20;
             return new THREE.Vector3(
@@ -2623,6 +3995,17 @@
         function updateEnvironment(delta, elapsedTime) {
             for (const animator of environmentAnimators) {
                 animator(delta, elapsedTime);
+            }
+        }
+
+        function setPerPlayerVisibility(renderingIdx) {
+            // P1 visuals
+            if (weapon) weapon.visible = (renderingIdx === 0 && !thirdPerson);
+            if (playerModel) playerModel.visible = (renderingIdx === 0 ? thirdPerson : true);
+            // P2 visuals
+            if (player2) {
+                if (player2.weapon) player2.weapon.visible = (renderingIdx === 1 && !player2.thirdPerson);
+                if (player2.playerModel) player2.playerModel.visible = (renderingIdx === 1 ? player2.thirdPerson : true);
             }
         }
 
@@ -2640,31 +4023,84 @@
             const delta = clock.getDelta();
             const elapsed = clock.elapsedTime;
 
-            updatePlayer(delta);
-            updateEnemies(delta);
-            updateBullets(delta);
-            updateParticles(delta);
-            updateMedkits(delta);
-            handleHealthRegen(delta);
-            updateShooting();
-            updateEnvironment(delta, elapsed);
-            updateCameraPerspective(delta);
+            if (isOnline1v1 && !iAmHost) {
+                // ===== Joiner-side update: minimal simulation, just local input + camera =====
+                // Local player movement is purely cosmetic on the joiner side; the host's
+                // snapshot will overwrite player2.yawObject.position each tick. We still
+                // update the camera based on yaw/pitch (already set by onMouseMove).
+                updateCameraPerspectiveFor(1, delta);
+                updateEnvironment(delta, elapsed);
+                // Send our inputs to host
+                const nowMs = performance.now();
+                if (nowMs - lastInputSendTime > 1000 / INPUT_RATE_HZ) {
+                    netSendInput();
+                    lastInputSendTime = nowMs;
+                }
+            } else {
+                // ===== Host (or classic single-player) =====
+                for (const idx of getActivePlayerIndices()) {
+                    updatePlayerFor(idx, delta);
+                }
+                updateEnemies(delta);
+                updateBullets(delta);
+                updateParticles(delta);
+                updateMedkits(delta);
+                handleHealthRegen(delta);
+                updateShooting();
+                updateEnvironment(delta, elapsed);
+                updateCameraPerspective(delta);
 
+                // Host: send periodic snapshot to joiner
+                if (isOnline1v1 && iAmHost) {
+                    const nowMs = performance.now();
+                    if (nowMs - lastSnapshotSendTime > 1000 / SNAPSHOT_RATE_HZ) {
+                        if (conn && conn.open) {
+                            try { conn.send(buildSnapshot()); } catch (e) {}
+                        }
+                        lastSnapshotSendTime = nowMs;
+                    }
+                }
+            }
+
+            // Combo decrement per-player
             if (comboTimeLeft > 0) {
                 comboTimeLeft -= delta;
                 if (comboTimeLeft <= 0) {
                     comboTimeLeft = 0;
                     comboMultiplier = 1;
                 }
-                updateHUD();
+                updateHUDFor(0);
             } else if (dashCooldown > 0 || isDashing) {
-                // Keep updating HUD while dash is on cooldown to animate the bar
-                updateHUD();
+                updateHUDFor(0);
+            }
+            if (player2) {
+                if (player2.comboTimeLeft > 0) {
+                    player2.comboTimeLeft -= delta;
+                    if (player2.comboTimeLeft <= 0) {
+                        player2.comboTimeLeft = 0;
+                        player2.comboMultiplier = 1;
+                    }
+                    updateHUDFor(1);
+                } else if (player2.dashCooldown > 0 || player2.isDashing) {
+                    updateHUDFor(1);
+                }
             }
 
-            renderer.render(scene, camera);
+            // ===== Render =====
+            // Single fullscreen viewport. In 1v1 online, each client renders only their own
+            // camera; the opponent player model is visible thanks to setPerPlayerVisibility.
+            renderer.setScissorTest(false);
+            renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
+            if (is1v1) {
+                const localIdx = localPlayerIdx();
+                setPerPlayerVisibility(localIdx);
+                const cam = (localIdx === 1 && camera2) ? camera2 : camera;
+                renderer.render(scene, cam);
+            } else {
+                renderer.render(scene, camera);
+            }
         }
-        
+
         function onKeyDown(event) {
             const key = event.key.toLowerCase();
             keys[key] = true;
@@ -2672,13 +4108,17 @@
             if (event.key === 'Tab') {
                 event.preventDefault();
                 if (gameStarted) {
-                    togglePerspective();
+                    togglePerspective(localPlayerIdx());
                 }
                 return;
             }
 
             if (key === 'r' && gameStarted) {
-                reload();
+                if (isOnline1v1 && !iAmHost) {
+                    netSendInput({ reloadReq: true });
+                } else {
+                    reload(localPlayerIdx());
+                }
             }
 
             if (event.key === 'Escape') {
@@ -2690,43 +4130,76 @@
         function onKeyUp(event) {
             keys[event.key.toLowerCase()] = false;
         }
-        
+
         function onMouseMove(event) {
             if (!gameStarted || gamePaused) return;
-            
+            const localIdx = localPlayerIdx();
+            if (!isPlayerAlive(localIdx)) return;
+
             const sensitivity = 0.002;
-            
-            yaw -= event.movementX * sensitivity;
-            pitch -= event.movementY * sensitivity;
-            
-            // Limit pitch to prevent over-rotation
-            pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch));
-            
-            yawObject.rotation.y = yaw;
-            pitchObject.rotation.x = pitch;
+            const dyaw = -event.movementX * sensitivity;
+            const dpitch = -event.movementY * sensitivity;
+
+            if (localIdx === 0) {
+                yaw += dyaw;
+                pitch += dpitch;
+                pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch));
+                yawObject.rotation.y = yaw;
+                pitchObject.rotation.x = pitch;
+            } else if (player2) {
+                player2.yaw += dyaw;
+                player2.pitch += dpitch;
+                player2.pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, player2.pitch));
+                player2.yawObject.rotation.y = player2.yaw;
+                player2.pitchObject.rotation.x = player2.pitch;
+            }
         }
 
         function onMouseDown(event) {
             if (!gameStarted || gamePaused) return;
             isMouseDown = true;
-            shoot();
+            const localIdx = localPlayerIdx();
+            if (isOnline1v1 && !iAmHost) {
+                // Joiner: send shoot request to host, who runs authoritative fire
+                netSendInput({ shoot: true });
+            } else {
+                shoot(localIdx);
+            }
         }
 
         function onMouseUp(event) {
             isMouseDown = false;
+            if (isOnline1v1 && !iAmHost) {
+                netSendInput({ shootRelease: true });
+            }
         }
 
         function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            const aspect = w / h;
+            camera.aspect = aspect;
             camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            if (camera2) {
+                camera2.aspect = aspect;
+                camera2.updateProjectionMatrix();
+            }
+            renderer.setSize(w, h);
         }
-        
-        function startGame() {
-            document.getElementById('instructions').style.display = 'none';
-            gameStarted = true;
-            gamePaused = false;
 
+        function startGame(mode) {
+            if (!mode) mode = 'classic';
+            gameMode = mode;
+            isOnline1v1 = (mode === '1v1online');
+            is1v1 = isOnline1v1;
+
+            document.body.classList.toggle('mode-1v1', is1v1);
+            document.getElementById('instructions').style.display = 'none';
+
+            // Cleanup any prior P2 state
+            destroyPlayer2();
+
+            // Reset shared state
             score = 0;
             kills = 0;
             wave = 1;
@@ -2736,14 +4209,36 @@
             health = maxHealth;
             ammo = maxAmmo;
             lastDamageTime = Date.now();
+            p1Alive = true;
+            p2Alive = true;
+            comboMultiplier = 1;
+            comboTimeLeft = 0;
+            dashCooldown = 0;
+            isDashing = false;
+            dashTime = 0;
+            isReloading = false;
+            velocity.set(0, 0, 0);
+            weaponRecoil = 0;
+            screenShake = 0;
+            isMouseDown = false;
+            thirdPerson = false;
+            cameraOffsetTarget.copy(firstPersonCameraOffset);
+            cameraCurrentOffset.copy(firstPersonCameraOffset);
 
-            for (let i = medkits.length - 1; i >= 0; i--) {
-                scene.remove(medkits[i]);
-            }
+            // Reset bot targeting accounting
+            p1TargetedByCount = 0;
+            p2TargetedByCount = 0;
+
+            // Clear existing enemies/bullets/medkits/powerups
+            for (let i = enemies.length - 1; i >= 0; i--) scene.remove(enemies[i]);
+            enemies.length = 0;
+            for (let i = bullets.length - 1; i >= 0; i--) { bullets[i].visible = false; bulletPool.push(bullets[i]); }
+            bullets.length = 0;
+            for (let i = enemyBullets.length - 1; i >= 0; i--) { enemyBullets[i].visible = false; enemyBulletPool.push(enemyBullets[i]); }
+            enemyBullets.length = 0;
+            for (let i = medkits.length - 1; i >= 0; i--) scene.remove(medkits[i]);
             medkits.length = 0;
-            for (let i = powerups.length - 1; i >= 0; i--) {
-                scene.remove(powerups[i]);
-            }
+            for (let i = powerups.length - 1; i >= 0; i--) scene.remove(powerups[i]);
             powerups.length = 0;
 
             shieldActive = false;
@@ -2753,11 +4248,34 @@
             document.getElementById('shield-indicator').style.display = 'none';
             document.getElementById('overdrive-indicator').style.display = 'none';
 
+            // Mode-specific player setup
+            if (is1v1) {
+                // Reposition P1 + build P2
+                createPlayer2();
+                // (createPlayer2 positions P1 facing P2)
+                // Ensure P1 model visible across P2's view from frame 1
+                if (playerModel) playerModel.visible = true;
+            } else {
+                // Classic spawn at origin
+                yawObject.position.set(0, 1.6, 0);
+                yawObject.rotation.y = 0;
+                yaw = 0;
+                pitch = 0;
+                pitchObject.rotation.x = 0;
+                if (weapon) weapon.visible = true;
+                if (playerModel) playerModel.visible = false;
+            }
+
+            gameStarted = true;
+            gamePaused = false;
+
             lastMedkitSpawn = Date.now();
             updateHUD();
             updateModeIndicator();
+            if (is1v1) updateModeIndicatorFor(1);
+            onWindowResize();
 
-            // Request pointer lock
+            // Request pointer lock for P1's mouse
             renderer.domElement.requestPointerLock =
                 renderer.domElement.requestPointerLock ||
                 renderer.domElement.mozRequestPointerLock ||
@@ -2769,7 +4287,24 @@
             document.addEventListener('mozpointerlockchange', onPointerLockChange);
             document.addEventListener('webkitpointerlockchange', onPointerLockChange);
 
-            startWave();
+            // Reset netcode timing
+            lastSnapshotSendTime = 0;
+            lastInputSendTime = 0;
+            netRemoteTargets = { p1: null, p2: null };
+            // Clear joiner-side caches from any prior session
+            for (const [id, entry] of netEnemyState) { scene.remove(entry.mesh); }
+            netEnemyState.clear();
+            for (const [id, entry] of netBulletState) { scene.remove(entry.mesh); }
+            netBulletState.clear();
+            for (const [id, entry] of netMedkitState) { scene.remove(entry.mesh); }
+            netMedkitState.clear();
+            for (const [id, entry] of netPowerupState) { scene.remove(entry.mesh); }
+            netPowerupState.clear();
+
+            // Only the host (or single-player classic) runs the wave system; joiner just listens.
+            if (!isOnline1v1 || iAmHost) {
+                startWave();
+            }
         }
         
         function onPointerLockChange() {
@@ -2782,6 +4317,28 @@
             }
         }
         
+        // Wire mode-select hover to swap visible control hints
+        (function wireModeHints() {
+            const classicBtn = document.querySelector('#mode-select button:nth-child(1)');
+            const oneV1Btn = document.querySelector('#mode-select button:nth-child(2)');
+            const classicBlock = document.getElementById('ctrl-classic');
+            const p1Block = document.getElementById('ctrl-1v1');
+            const p2Block = document.getElementById('ctrl-1v1-p2');
+            function show(mode) {
+                if (mode === 'classic') {
+                    classicBlock.classList.add('active');
+                    p1Block.classList.remove('active');
+                    p2Block.classList.remove('active');
+                } else {
+                    classicBlock.classList.remove('active');
+                    p1Block.classList.add('active');
+                    p2Block.classList.add('active');
+                }
+            }
+            if (classicBtn) classicBtn.addEventListener('mouseenter', () => show('classic'));
+            if (oneV1Btn)   oneV1Btn.addEventListener('mouseenter', () => show('1v1'));
+        })();
+
         // Initialize and start
         init();
         animate();
