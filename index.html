@@ -938,6 +938,7 @@
                     p.inUse = true;
                     p.visible = true;
                     p.material.opacity = 1;
+                    p.material.color.setHex(color);
                     return p;
                 }
             }
@@ -1054,7 +1055,8 @@
         let netMedkitState = new Map();   // id → { mesh }
         let netPowerupState = new Map();  // id → { mesh, type }
         // Joiner: target position from snapshot to lerp toward
-        let netRemoteTargets = { p1: null, p2: null };
+        let netRemoteTargets = { p1: null, p2: null, initialized: false };
+        let lastSnapshotTs = 0;            // Drop stale/out-of-order snapshots (unreliable channel)
 
         function localPlayerIdx() {
             if (!is1v1) return 0;
@@ -1202,14 +1204,10 @@
                 }
                 if (msg.t === 'input' && iAmHost) {
                     lastNetInput = msg;
-                    // Discrete events: shoot, reload — handled once on receive
-                    if (msg.shoot && player2) {
-                        player2.isFiring = true;
-                        shoot(1);
-                    }
-                    if (msg.shootRelease && player2) {
-                        player2.isFiring = false;
-                    }
+                    // Firing is driven by the continuous isFiring flag (present in every input
+                    // packet) rather than a one-shot event, so a dropped packet never loses a
+                    // shot on the unreliable channel. Edge/auto-fire is resolved in updateShooting.
+                    if (player2) player2.isFiring = !!msg.isFiring;
                     if (msg.reloadReq) {
                         reload(1);
                     }
@@ -1317,11 +1315,21 @@
             return snap;
         }
 
+        const netLerpVec = new THREE.Vector3();
+
         function applySnapshot(snap) {
+            // Drop stale/out-of-order snapshots arriving on the unreliable channel.
+            if (snap.ts) {
+                if (snap.ts < lastSnapshotTs) return;
+                lastSnapshotTs = snap.ts;
+            }
+            const firstSnap = !netRemoteTargets.initialized;
+
             // Apply to remote player (player1 = host = remote from joiner's POV)
             if (snap.p1 && yawObject) {
                 netRemoteTargets.p1 = snap.p1;
-                yawObject.position.set(snap.p1.x, snap.p1.y, snap.p1.z);
+                // Position is interpolated each frame in animate(); snap only on the first packet.
+                if (firstSnap) yawObject.position.set(snap.p1.x, snap.p1.y, snap.p1.z);
                 yawObject.rotation.y = snap.p1.yaw;
                 if (pitchObject) pitchObject.rotation.x = snap.p1.pitch;
                 const wasAlive = p1Alive;
@@ -1331,7 +1339,6 @@
                 kills = snap.p1.kills;
                 score = snap.p1.score;
                 if (playerModel) {
-                    playerModel.position.set(snap.p1.x, snap.p1.y - 1.6, snap.p1.z);
                     playerModel.rotation.y = snap.p1.yaw;
                     playerModel.visible = wasAlive && p1Alive;
                 }
@@ -1354,10 +1361,10 @@
                 player2.dashCooldown = snap.p2.dashCooldown;
                 const wasP2Alive = p2Alive;
                 p2Alive = snap.p2.alive;
-                // Position: authoritative (host has the final say)
-                player2.yawObject.position.set(snap.p2.x, snap.p2.y, snap.p2.z);
+                // Position: authoritative (host has the final say); interpolated in animate().
+                netRemoteTargets.p2 = snap.p2;
+                if (firstSnap) player2.yawObject.position.set(snap.p2.x, snap.p2.y, snap.p2.z);
                 if (player2.playerModel) {
-                    player2.playerModel.position.set(snap.p2.x, snap.p2.y - 1.6, snap.p2.z);
                     player2.playerModel.rotation.y = player2.yaw;
                 }
                 if (!p2Alive && player2.weapon) player2.weapon.visible = false;
@@ -1385,6 +1392,7 @@
                     if (gameStarted) showJoinerEndScreen(snap);
                 }
             }
+            netRemoteTargets.initialized = true;
             wave = snap.wave;
             updateHUDFor(0);
             updateHUDFor(1);
@@ -1409,6 +1417,7 @@
             for (const [id, entry] of netEnemyState) {
                 if (!seenBots.has(id)) {
                     scene.remove(entry.mesh);
+                    if (entry.mesh.material) entry.mesh.material.dispose(); // cloned per bot
                     netEnemyState.delete(id);
                 }
             }
@@ -1451,7 +1460,12 @@
                 entry.mesh.rotation.y += 0.04;
             }
             for (const [id, entry] of netMedkitState) {
-                if (!seenMedkits.has(id)) { scene.remove(entry.mesh); netMedkitState.delete(id); }
+                if (!seenMedkits.has(id)) {
+                    scene.remove(entry.mesh);
+                    entry.mesh.geometry.dispose();
+                    entry.mesh.material.dispose();
+                    netMedkitState.delete(id);
+                }
             }
             // Powerups
             const seenPowerups = new Set();
@@ -1472,7 +1486,12 @@
                 entry.mesh.rotation.y += 0.05;
             }
             for (const [id, entry] of netPowerupState) {
-                if (!seenPowerups.has(id)) { scene.remove(entry.mesh); netPowerupState.delete(id); }
+                if (!seenPowerups.has(id)) {
+                    scene.remove(entry.mesh);
+                    entry.mesh.geometry.dispose();
+                    entry.mesh.material.dispose();
+                    netPowerupState.delete(id);
+                }
             }
         }
 
@@ -1573,7 +1592,8 @@
             document.addEventListener('mousedown', onMouseDown);
             document.addEventListener('mouseup', onMouseUp);
             window.addEventListener('resize', onWindowResize);
-            
+            window.addEventListener('blur', resetInputState);
+
             // Prevent right-click context menu
             renderer.domElement.addEventListener('contextmenu', function(e) {
                 e.preventDefault();
@@ -1714,10 +1734,13 @@
                 pillar.userData.boundingBox = new THREE.Box3().setFromObject(pillar);
                 obstacles.push(pillar);
 
-                // Add glow
-                const glowLight = new THREE.PointLight(0x00ffff, 0.5, 10);
-                glowLight.position.copy(pillar.position);
-                scene.add(glowLight);
+                // Add glow — but only on a few pillars. Every dynamic light adds per-fragment
+                // cost across the whole scene in the forward renderer, so cap the count.
+                if (i < 4) {
+                    const glowLight = new THREE.PointLight(0x00ffff, 0.6, 12);
+                    glowLight.position.copy(pillar.position);
+                    scene.add(glowLight);
+                }
             }
 
             buildNavigationGrid();
@@ -1837,6 +1860,44 @@
             return Math.hypot(x1 - x2, z1 - z2);
         }
 
+        // Reusable binary min-heap (keyed by f-score) for A*. Module-level so repeated
+        // pathfinding calls don't reallocate. Not re-entrant (single-threaded use only).
+        const _heapF = [];
+        const _heapI = [];
+        function heapClear() { _heapF.length = 0; _heapI.length = 0; }
+        function heapPush(f, idx) {
+            let c = _heapF.length;
+            _heapF.push(f); _heapI.push(idx);
+            while (c > 0) {
+                const par = (c - 1) >> 1;
+                if (_heapF[par] <= _heapF[c]) break;
+                const tf = _heapF[par]; _heapF[par] = _heapF[c]; _heapF[c] = tf;
+                const ti = _heapI[par]; _heapI[par] = _heapI[c]; _heapI[c] = ti;
+                c = par;
+            }
+        }
+        function heapPop() {
+            const topI = _heapI[0];
+            const lastF = _heapF.pop();
+            const lastI = _heapI.pop();
+            const len = _heapF.length;
+            if (len > 0) {
+                _heapF[0] = lastF; _heapI[0] = lastI;
+                let c = 0;
+                while (true) {
+                    const l = 2 * c + 1, r = 2 * c + 2;
+                    let sm = c;
+                    if (l < len && _heapF[l] < _heapF[sm]) sm = l;
+                    if (r < len && _heapF[r] < _heapF[sm]) sm = r;
+                    if (sm === c) break;
+                    const tf = _heapF[sm]; _heapF[sm] = _heapF[c]; _heapF[c] = tf;
+                    const ti = _heapI[sm]; _heapI[sm] = _heapI[c]; _heapI[c] = ti;
+                    c = sm;
+                }
+            }
+            return topI;
+        }
+
         function findPath(startPosition, targetPosition) {
             if (!navigationGrid.cells || navigationGrid.cells.length === 0) return null;
 
@@ -1852,9 +1913,7 @@
             const goalIndex = getCellIndex(validGoal.x, validGoal.z);
 
             const totalCells = navigationGrid.width * navigationGrid.height;
-            const open = [startIndex];
-            const openSet = new Uint8Array(totalCells);
-            openSet[startIndex] = 1;
+            const closed = new Uint8Array(totalCells);
 
             const cameFrom = new Int32Array(totalCells).fill(-1);
             const gScore = new Float32Array(totalCells).fill(Infinity);
@@ -1868,28 +1927,13 @@
                 [1, 1], [1, -1], [-1, 1], [-1, -1]
             ];
 
-            while (open.length > 0) {
-                let currentIndex = 0;
-                let currentIdx = open[0];
-                let lowestScore = fScore[currentIdx];
+            heapClear();
+            heapPush(fScore[startIndex], startIndex);
 
-                for (let i = 1; i < open.length; i++) {
-                    const idx = open[i];
-                    const score = fScore[idx];
-                    if (score < lowestScore) {
-                        lowestScore = score;
-                        currentIdx = idx;
-                        currentIndex = i;
-                    }
-                }
-
-                // O(1) removal from array by swapping with last element
-                const lastIdx = open.length - 1;
-                if (currentIndex !== lastIdx) {
-                    open[currentIndex] = open[lastIdx];
-                }
-                open.pop();
-                openSet[currentIdx] = 0;
+            while (_heapF.length > 0) {
+                const currentIdx = heapPop();
+                if (closed[currentIdx]) continue; // stale lazy-deleted entry
+                closed[currentIdx] = 1;
 
                 if (currentIdx === goalIndex) {
                     return reconstructPath(cameFrom, currentIdx);
@@ -1904,24 +1948,23 @@
 
                     if (!isCellWalkable(nx, nz)) continue;
 
-                    if (Math.abs(dx) === 1 && Math.abs(dz) === 1) {
+                    const diagonal = (dx !== 0 && dz !== 0);
+                    if (diagonal) {
                         if (!isCellWalkable(cx + dx, cz) || !isCellWalkable(cx, cz + dz)) {
                             continue;
                         }
                     }
 
                     const neighborIdx = getCellIndex(nx, nz);
-                    const tentativeG = gScore[currentIdx] + (Math.abs(dx) === 1 && Math.abs(dz) === 1 ? Math.SQRT2 : 1);
+                    if (closed[neighborIdx]) continue;
+                    const tentativeG = gScore[currentIdx] + (diagonal ? Math.SQRT2 : 1);
 
                     if (tentativeG < gScore[neighborIdx]) {
                         cameFrom[neighborIdx] = currentIdx;
                         gScore[neighborIdx] = tentativeG;
-                        fScore[neighborIdx] = tentativeG + heuristic(nx, nz, validGoal.x, validGoal.z);
-
-                        if (!openSet[neighborIdx]) {
-                            openSet[neighborIdx] = 1;
-                            open.push(neighborIdx);
-                        }
+                        const f = tentativeG + heuristic(nx, nz, validGoal.x, validGoal.z);
+                        fScore[neighborIdx] = f;
+                        heapPush(f, neighborIdx); // lazy decrease-key
                     }
                 }
             }
@@ -2447,9 +2490,11 @@
             enemy.userData.lastShotTime = Date.now();
             enemy.userData.shootCooldown = Math.max(1200, 2600 - wave * 160) * (type === 'brute' ? 1.5 : 1);
 
-            enemy.userData.hitGlow = new THREE.PointLight(type === 'speedster' ? 0xffaa00 : (type === 'brute' ? 0xff0000 : 0xff3355), 0.8, 6 * scaleMult);
-            enemy.userData.hitGlow.position.y = visorYOffset - 0.2;
-            enemy.add(enemy.userData.hitGlow);
+            // Note: enemies intentionally carry no per-unit PointLight. With up to ~30 bots on
+            // screen that would mean dozens of dynamic lights, which forces the forward renderer
+            // to recompile shaders and tanks the frame rate. The animated emissive material
+            // (updated in updateEnemies as health drops) provides the glow look instead.
+            enemy.userData.hitGlow = null;
 
             enemy.userData.path = [];
             enemy.userData.pathTargetKey = null;
@@ -2819,10 +2864,10 @@
             const isP2 = (playerIdx === 1);
             const p = isP2 ? player2 : null;
             if (isP2) {
-                if (!p || p.isReloading) return;
+                if (!p || p.isReloading || p.ammo >= maxAmmo) return;
                 p.isReloading = true;
             } else {
-                if (isReloading) return;
+                if (isReloading || ammo >= maxAmmo) return;
                 isReloading = true;
             }
             const suffix = isP2 ? '-2' : '';
@@ -3243,6 +3288,7 @@
                 decTargetedCount(enemy.userData.targetPlayer);
             }
             scene.remove(enemy);
+            if (enemy.material) enemy.material.dispose(); // material is cloned per enemy
             enemies.splice(index, 1);
 
             // Credit the player who killed it (defaults to P1 if unattributed)
@@ -3565,13 +3611,26 @@
             }
         }
         
+        // Clear transient input so the player doesn't keep walking/firing after focus loss.
+        function resetInputState() {
+            keys = {};
+            if (isMouseDown) {
+                isMouseDown = false;
+                if (isOnline1v1 && !iAmHost && conn && conn.open) {
+                    netSendInput({ shootRelease: true });
+                }
+            }
+            if (player2) player2.isFiring = false;
+        }
+
         function togglePause() {
             if (!gameStarted) return;
-            
+
             gamePaused = !gamePaused;
             const pauseMenu = document.getElementById('pause-menu');
-            
+
             if (gamePaused) {
+                resetInputState();
                 pauseMenu.style.display = 'block';
                 document.exitPointerLock();
             } else {
@@ -3588,11 +3647,15 @@
                     shoot(0);
                 }
             }
-            // Host: P2 rapid-fire driven by joiner's input.isFiring
-            if (isOnline1v1 && iAmHost && p2Alive && player2 && player2.rapidFireEnabled) {
-                if (lastNetInput && lastNetInput.isFiring) {
+            // Host: P2 firing driven by joiner's input.isFiring. Rising edge fires a single
+            // shot; while held with rapid-fire it auto-fires. shoot()'s own cooldown caps the
+            // rate. This is resilient to dropped packets (state-based, not event-based).
+            if (isOnline1v1 && iAmHost && p2Alive && player2) {
+                const firing = !!(lastNetInput && lastNetInput.isFiring);
+                if (firing && (player2.rapidFireEnabled || !player2._prevFiring)) {
                     shoot(1);
                 }
+                player2._prevFiring = firing;
             }
         }
 
@@ -3842,6 +3905,8 @@
                     showMedkitAlert(`+${medkitHealAmount} Health`);
                     scene.remove(medkit);
                     if (medkit.userData.light) medkit.remove(medkit.userData.light);
+                    medkit.geometry.dispose();
+                    medkit.material.dispose();
                     medkits.splice(i, 1);
                     updateHUDFor(pickerIdx);
                 }
@@ -3882,6 +3947,8 @@
 
                     scene.remove(powerup);
                     if (powerup.userData.light) powerup.remove(powerup.userData.light);
+                    powerup.geometry.dispose();
+                    powerup.material.dispose();
                     powerups.splice(i, 1);
                     updateHUDFor(pickerIdx);
                 }
@@ -4020,14 +4087,30 @@
                 lastFPSUpdateTime = now;
             }
 
-            const delta = clock.getDelta();
+            // Clamp delta to avoid huge physics steps after a tab switch / stall,
+            // which would otherwise teleport entities and skip bullet collisions.
+            const delta = Math.min(clock.getDelta(), 0.05);
             const elapsed = clock.elapsedTime;
 
             if (isOnline1v1 && !iAmHost) {
                 // ===== Joiner-side update: minimal simulation, just local input + camera =====
                 // Local player movement is purely cosmetic on the joiner side; the host's
-                // snapshot will overwrite player2.yawObject.position each tick. We still
-                // update the camera based on yaw/pitch (already set by onMouseMove).
+                // snapshot is the authority. Smoothly interpolate toward the latest snapshot
+                // position each frame (instead of hard-snapping at 30 Hz) to kill jitter.
+                const lerpA = Math.min(1, delta * 18);
+                const t1 = netRemoteTargets.p1;
+                if (t1 && yawObject) {
+                    yawObject.position.lerp(netLerpVec.set(t1.x, t1.y, t1.z), lerpA);
+                    if (playerModel) playerModel.position.set(yawObject.position.x, yawObject.position.y - 1.6, yawObject.position.z);
+                }
+                const t2 = netRemoteTargets.p2;
+                if (t2 && player2) {
+                    player2.yawObject.position.lerp(netLerpVec.set(t2.x, t2.y, t2.z), lerpA);
+                    if (player2.playerModel) {
+                        player2.playerModel.position.set(player2.yawObject.position.x, player2.yawObject.position.y - 1.6, player2.yawObject.position.z);
+                        player2.playerModel.rotation.y = player2.yaw;
+                    }
+                }
                 updateCameraPerspectiveFor(1, delta);
                 updateEnvironment(delta, elapsed);
                 // Send our inputs to host
@@ -4157,6 +4240,7 @@
 
         function onMouseDown(event) {
             if (!gameStarted || gamePaused) return;
+            if (event.button !== 0) return; // left button only
             isMouseDown = true;
             const localIdx = localPlayerIdx();
             if (isOnline1v1 && !iAmHost) {
@@ -4168,6 +4252,7 @@
         }
 
         function onMouseUp(event) {
+            if (event.button !== 0) return; // left button only
             isMouseDown = false;
             if (isOnline1v1 && !iAmHost) {
                 netSendInput({ shootRelease: true });
@@ -4230,15 +4315,26 @@
             p2TargetedByCount = 0;
 
             // Clear existing enemies/bullets/medkits/powerups
-            for (let i = enemies.length - 1; i >= 0; i--) scene.remove(enemies[i]);
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                scene.remove(enemies[i]);
+                if (enemies[i].material) enemies[i].material.dispose();
+            }
             enemies.length = 0;
             for (let i = bullets.length - 1; i >= 0; i--) { bullets[i].visible = false; bulletPool.push(bullets[i]); }
             bullets.length = 0;
             for (let i = enemyBullets.length - 1; i >= 0; i--) { enemyBullets[i].visible = false; enemyBulletPool.push(enemyBullets[i]); }
             enemyBullets.length = 0;
-            for (let i = medkits.length - 1; i >= 0; i--) scene.remove(medkits[i]);
+            for (let i = medkits.length - 1; i >= 0; i--) {
+                scene.remove(medkits[i]);
+                medkits[i].geometry.dispose();
+                medkits[i].material.dispose();
+            }
             medkits.length = 0;
-            for (let i = powerups.length - 1; i >= 0; i--) scene.remove(powerups[i]);
+            for (let i = powerups.length - 1; i >= 0; i--) {
+                scene.remove(powerups[i]);
+                powerups[i].geometry.dispose();
+                powerups[i].material.dispose();
+            }
             powerups.length = 0;
 
             shieldActive = false;
@@ -4290,7 +4386,8 @@
             // Reset netcode timing
             lastSnapshotSendTime = 0;
             lastInputSendTime = 0;
-            netRemoteTargets = { p1: null, p2: null };
+            lastSnapshotTs = 0;
+            netRemoteTargets = { p1: null, p2: null, initialized: false };
             // Clear joiner-side caches from any prior session
             for (const [id, entry] of netEnemyState) { scene.remove(entry.mesh); }
             netEnemyState.clear();
